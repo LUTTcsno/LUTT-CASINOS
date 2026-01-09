@@ -28,7 +28,7 @@
 <header>
   <h1>LUTT Visual Casino</h1>
   <div id="userInfo" class="hidden">
-    Logged in as: <span id="userEmail"></span> |
+    Logged in as: <span id="userNameDisplay"></span> |
     Balance: <span id="balance"></span> LUTT |
     Streak: <span id="streak"></span> days
     <button id="logoutBtn">Logout</button>
@@ -36,6 +36,7 @@
 </header>
 
 <div id="login" class="card">
+  <input id="username" type="text" placeholder="Choose a username" autocomplete="username" />
   <input id="email" type="email" placeholder="Email" autocomplete="username" />
   <input id="password" type="password" placeholder="Password" autocomplete="current-password" />
   <button id="signUpBtn">Sign Up</button>
@@ -63,21 +64,33 @@
   <section id="caseOpen" class="gameTab hidden">
     <h2>Daily Case</h2>
     <button id="caseBtn">Open Case</button>
-
-    <!-- Spinner container -->
     <div id="caseSpinner" class="spinner-container hidden">
       <div id="spinnerTrack" class="spinner-track"></div>
     </div>
-
     <p id="caseResult"></p>
   </section>
 
   <section id="blackjack" class="gameTab hidden">
     <h2>Blackjack</h2>
-    <div id="blackjackArea" class="gameArea">
-      <button id="blackjackPlayBtn">Play Blackjack (100 LUTT bet)</button>
-      <div id="blackjackCards"></div>
+    <div id="blackjackTable" class="table">
+      <div class="dealerArea">
+        <h3>Dealer</h3>
+        <div id="dealerCards" class="cards"></div>
+      </div>
+
+      <div class="playerArea">
+        <h3>You</h3>
+        <div id="playerCards" class="cards"></div>
+      </div>
+
+      <div class="controls">
+        <button id="hitBtn" disabled>Hit</button>
+        <button id="standBtn" disabled>Stand</button>
+        <button id="doubleBtn" disabled>Double Down</button>
+      </div>
+
       <p id="blackjackResult"></p>
+      <button id="blackjackPlayBtn">Start Blackjack (100 LUTT bet)</button>
     </div>
   </section>
 
