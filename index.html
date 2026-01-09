@@ -1,6 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+  // Your Firebase config from Step 4 here:
+  const firebaseConfig = {
+  apiKey: "AIzaSyD6CNjm2upOaD4BP3f7MBUPh0u1IDkHjh4",
+  authDomain: "lutt-casinos.firebaseapp.com",
+  projectId: "lutt-casinos",
+  storageBucket: "lutt-casinos.firebasestorage.app",
+  messagingSenderId: "1061450870530",
+  appId: "1:1061450870530:web:27cd82b5e433cc6320dc1b",
+  measurementId: "G-TXJY4VLCHV"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+
+  // Shortcuts
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+</script>
+
   <meta charset="UTF-8" />
   <title>LUTT Visual Casino</title>
   <link rel="stylesheet" href="style.css" />
@@ -11,9 +36,12 @@
 <p class="disclaimer">Play-money only. LUTT has no real value.</p>
 
 <div id="login" class="card">
-  <input id="username" placeholder="Username" />
-  <button onclick="login()">Login</button>
+  <input id="email" type="email" placeholder="Email" />
+  <input id="password" type="password" placeholder="Password" />
+  <button onclick="handleSignUp()">Sign Up</button>
+  <button onclick="handleLogin()">Login</button>
 </div>
+
 
 <div id="game" class="hidden">
   <h2>💰 <span id="balance"></span> LUTT</h2>
