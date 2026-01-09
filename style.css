@@ -177,17 +177,3 @@ ul#leaderboardList li {
   position: relative;
   box-shadow: 0 0 20px #00ff99aa;
 }
-
-.roulette-pointer {
-  position: absolute;
-  top: -20px;
-  left: 50%;
-  width: 0; 
-  height: 0; 
-  border-left: 15px solid transparent;
-  border-right: 15px solid transparent;
-  border-bottom: 25px solid #00ff99;
-  transform: translateX(-50%);
-}
-
-/* More game styling can be added similarly */
