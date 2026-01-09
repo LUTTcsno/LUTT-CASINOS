@@ -1,82 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
-<script>
-  // Your Firebase config from Step 4 here:
-  const firebaseConfig = {
-  apiKey: "AIzaSyD6CNjm2upOaD4BP3f7MBUPh0u1IDkHjh4",
-  authDomain: "lutt-casinos.firebaseapp.com",
-  projectId: "lutt-casinos",
-  storageBucket: "lutt-casinos.firebasestorage.app",
-  messagingSenderId: "1061450870530",
-  appId: "1:1061450870530:web:27cd82b5e433cc6320dc1b",
-  measurementId: "G-TXJY4VLCHV"
-  };
-
-  // Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
-
-  // Shortcuts
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-</script>
-
   <meta charset="UTF-8" />
   <title>LUTT Visual Casino</title>
   <link rel="stylesheet" href="style.css" />
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD6CNjm2upOaD4BP3f7MBUPh0u1IDkHjh4",
+      authDomain: "lutt-casinos.firebaseapp.com",
+      projectId: "lutt-casinos",
+      storageBucket: "lutt-casinos.firebasestorage.app",
+      messagingSenderId: "1061450870530",
+      appId: "1:1061450870530:web:27cd82b5e433cc6320dc1b",
+      measurementId: "G-TXJY4VLCHV"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+  </script>
 </head>
 <body>
 
-<h1>🎮 LUTT Visual Casino</h1>
-<p class="disclaimer">Play-money only. LUTT has no real value.</p>
+<header>
+  <h1>LUTT Visual Casino</h1>
+  <div id="userInfo" class="hidden">
+    Logged in as: <span id="userEmail"></span> |
+    Balance: <span id="balance"></span> LUTT |
+    Streak: <span id="streak"></span> days
+    <button id="logoutBtn">Logout</button>
+  </div>
+</header>
 
 <div id="login" class="card">
-  <input id="email" type="email" placeholder="Email" />
-  <input id="password" type="password" placeholder="Password" />
-  <button onclick="handleSignUp()">Sign Up</button>
-  <button onclick="handleLogin()">Login</button>
+  <input id="email" type="email" placeholder="Email" autocomplete="username" />
+  <input id="password" type="password" placeholder="Password" autocomplete="current-password" />
+  <button id="signUpBtn">Sign Up</button>
+  <button id="loginBtn">Login</button>
 </div>
 
+<nav id="nav" class="hidden">
+  <button data-tab="dailyBonus">🎁 Daily Bonus</button>
+  <button data-tab="caseOpen">📦 Daily Case</button>
+  <button data-tab="blackjack">♠️ Blackjack</button>
+  <button data-tab="roulette">🎡 Roulette</button>
+  <button data-tab="poker">🃏 Poker</button>
+  <button data-tab="baccarat">♣️ Baccarat</button>
+  <button data-tab="caseBattle">⚔️ Case Battle</button>
+  <button data-tab="leaderboard">🏆 Leaderboard</button>
+</nav>
 
-<div id="game" class="hidden">
-  <h2>💰 <span id="balance"></span> LUTT</h2>
-  <p>🔥 Streak: <span id="streak"></span> days</p>
-
-  <div class="card">
-    <h3>🎁 Daily Bonus</h3>
-    <button id="dailyBonusBtn" onclick="claimDaily()">Claim Bonus</button>
+<main>
+  <section id="dailyBonus" class="gameTab hidden">
+    <h2>Daily Bonus</h2>
+    <button id="dailyBonusBtn">Claim Bonus</button>
     <p id="dailyMsg"></p>
-  </div>
+  </section>
 
-  <div class="card">
-    <h3>📦 Daily Case</h3>
-    <button id="caseBtn" onclick="openCase()">Open Case</button>
+  <section id="caseOpen" class="gameTab hidden">
+    <h2>Daily Case</h2>
+    <button id="caseBtn">Open Case</button>
     <div id="caseAnimation" class="case-animation hidden"></div>
     <p id="caseResult"></p>
-  </div>
+  </section>
 
-  <div class="card">
-    <h3>⚔️ Case Battle (vs Bot)</h3>
-    <input id="battleBet" type="number" placeholder="Entry LUTT" />
-    <button onclick="caseBattle()">Battle</button>
+  <section id="blackjack" class="gameTab hidden">
+    <h2>Blackjack</h2>
+    <div id="blackjackArea" class="gameArea">
+      <button id="blackjackPlayBtn">Play Blackjack (100 LUTT bet)</button>
+      <div id="blackjackCards"></div>
+      <p id="blackjackResult"></p>
+    </div>
+  </section>
+
+  <section id="roulette" class="gameTab hidden">
+    <h2>Roulette</h2>
+    <div id="rouletteArea" class="gameArea">
+      <button id="rouletteSpinBtn">Spin Roulette (50 LUTT bet)</button>
+      <div id="rouletteWheel" class="roulette-wheel"></div>
+      <p id="rouletteResult"></p>
+    </div>
+  </section>
+
+  <section id="poker" class="gameTab hidden">
+    <h2>Poker (Simplified)</h2>
+    <div id="pokerArea" class="gameArea">
+      <button id="pokerPlayBtn">Play Poker (150 LUTT bet)</button>
+      <p id="pokerResult"></p>
+    </div>
+  </section>
+
+  <section id="baccarat" class="gameTab hidden">
+    <h2>Baccarat</h2>
+    <div id="baccaratArea" class="gameArea">
+      <button id="baccaratPlayBtn">Play Baccarat (100 LUTT bet)</button>
+      <p id="baccaratResult"></p>
+    </div>
+  </section>
+
+  <section id="caseBattle" class="gameTab hidden">
+    <h2>Case Battle</h2>
+    <input id="battleBet" type="number" placeholder="Bet amount (LUTT)" min="1" />
+    <button id="battleBtn">Battle Bot</button>
     <div id="battleAnimation" class="case-animation hidden"></div>
     <p id="battleResult"></p>
-  </div>
+  </section>
 
-  <div class="card">
-    <h3>🏆 Local Leaderboard</h3>
-    <ul id="leaderboard"></ul>
-  </div>
-
-  <button onclick="logout()">Logout</button>
-</div>
+  <section id="leaderboard" class="gameTab hidden">
+    <h2>Leaderboard</h2>
+    <ul id="leaderboardList"></ul>
+  </section>
+</main>
 
 <script src="script.js"></script>
-
 </body>
 </html>
