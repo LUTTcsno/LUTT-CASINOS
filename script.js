@@ -634,4 +634,136 @@ function generatePlinkoBoard() {
         const slot = document.createElement("div");
         slot.classList.add("plinko-slot");
         slot.style.left = `${(c * pegSpacingX)}px`;
-       
+        slot.style.width = `${pegSpacingX}px`;
+        slot.style.bottom = "0";
+        slot.textContent = ""; // Will fill after game starts
+        plinkoBoard.appendChild(slot);
+      } else if ((r + c) % 2 === 1) {
+        // Pegs in staggered pattern
+        const peg = document.createElement("div");
+        peg.classList.add("plinko-peg");
+        peg.style.left = `${c * pegSpacingX + pegSpacingX/2}px`;
+        peg.style.top = `${r * pegSpacingY}px`;
+        plinkoBoard.appendChild(peg);
+      }
+    }
+  }
+}
+
+function normalDistributionPayouts(cols, difficulty) {
+  // Normal distribution centered at middle column with payouts inverse to distance
+  const payouts = [];
+  const center = Math.floor(cols / 2);
+  for (let i = 0; i < cols; i++) {
+    // distance from center
+    let dist = Math.abs(i - center);
+    // base payout: easier center tiles pay less, edges pay more
+    // Difficulty scaling:
+    // Easy: base 1 to 5 LUTT
+    // Medium: 2 to 10 LUTT
+    // Hard: 5 to 20 LUTT
+    let minPay, maxPay;
+    switch (difficulty) {
+      case "easy":
+        minPay = 1;
+        maxPay = 5;
+        break;
+      case "medium":
+        minPay = 2;
+        maxPay = 10;
+        break;
+      case "hard":
+        minPay = 5;
+        maxPay = 20;
+        break;
+      default:
+        minPay = 1;
+        maxPay = 5;
+    }
+    // payout proportional to distance from center
+    let payout = minPay + ((maxPay - minPay) * dist) / center;
+    payouts.push(Math.round(payout * 100) / 100);
+  }
+  return payouts;
+}
+
+function startPlinko() {
+  if (!currentUserData) {
+    alert("Please log in to play!");
+    return;
+  }
+  const wager = parseFloat(plinkoWagerInput.value);
+  if (!wager || wager < 1) {
+    alert("Enter a valid wager.");
+    return;
+  }
+  if (wager > currentUserData.balance) {
+    alert("Insufficient balance.");
+    return;
+  }
+  currentUserData.balance -= wager;
+  saveUserData(currentUserData);
+  updateBalances(currentUserData);
+
+  plinkoResult.textContent = "";
+  plinkoStartBtn.disabled = true;
+  plinkoBoard.innerHTML = "";
+
+  const difficulty = plinkoDifficultySelect.value;
+  const payouts = normalDistributionPayouts(plinkoCols, difficulty);
+
+  generatePlinkoBoard();
+
+  // Show payouts on slots
+  const slots = plinkoBoard.querySelectorAll(".plinko-slot");
+  slots.forEach((slot, idx) => {
+    slot.textContent = payouts[idx] + " LUTT";
+  });
+
+  // Drop ball simulation
+  let position = Math.floor(plinkoCols / 2);
+  const path = [position];
+
+  let step = 0;
+  const maxSteps = plinkoRows - 1;
+
+  function stepBall() {
+    if (step >= maxSteps) {
+      finishPlinko();
+      return;
+    }
+    // Ball moves left or right randomly, but biased toward center for normal dist approx
+    const center = Math.floor(plinkoCols / 2);
+    const bias = (center - position) * 0.3; // Pull back toward center
+
+    // Random move -1 (left) or +1 (right), with bias
+    let move = Math.random() < 0.5 + bias / plinkoCols ? -1 : 1;
+    // Clamp position so it doesn't go off board
+    position = Math.min(Math.max(position + move, 0), plinkoCols - 1);
+
+    path.push(position);
+    step++;
+
+    // Show ball position visually (optional: could animate with a div)
+    // For simplicity, no animation here.
+
+    setTimeout(stepBall, 150);
+  }
+
+  function finishPlinko() {
+    // Determine payout based on final position
+    const payout = payouts[position];
+    const winnings = wager * payout;
+    if (payout > 0) {
+      currentUserData.balance += winnings;
+      saveUserData(currentUserData);
+      updateBalances(currentUserData);
+      plinkoResult.textContent = `Ball landed in slot ${position + 1} — You won ${winnings.toFixed(2)} LUTT! 🎉`;
+    } else {
+      plinkoResult.textContent = `Ball landed in slot ${position + 1} — No winnings this time.`;
+    }
+    plinkoStartBtn.disabled = false;
+  }
+
+  stepBall();
+}
