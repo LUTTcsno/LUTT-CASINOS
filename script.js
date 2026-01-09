@@ -1,11 +1,19 @@
 let players = JSON.parse(localStorage.getItem("players")) || {};
 let user = null;
+const today = new Date().toDateString();
 
 function login() {
   const name = document.getElementById("username").value.trim();
   if (!name) return alert("Enter username");
 
-  if (!players[name]) players[name] = { balance: 1000 };
+  if (!players[name]) {
+    players[name] = {
+      balance: 1000,
+      lastLogin: "",
+      streak: 0,
+      lastCase: ""
+    };
+  }
   user = name;
   save();
   showGame();
@@ -20,11 +28,12 @@ function logout() {
 function showGame() {
   document.getElementById("login").classList.add("hidden");
   document.getElementById("game").classList.remove("hidden");
-  update();
+  updateUI();
 }
 
-function update() {
+function updateUI() {
   document.getElementById("balance").innerText = players[user].balance;
+  document.getElementById("streak").innerText = players[user].streak;
   updateLeaderboard();
 }
 
@@ -32,64 +41,77 @@ function save() {
   localStorage.setItem("players", JSON.stringify(players));
 }
 
-function coinFlip() {
-  betGame("betFlip", Math.random() < 0.5, 1, "flipResult");
+/* 🎁 DAILY LOGIN */
+function claimDaily() {
+  const p = players[user];
+  if (p.lastLogin === today)
+    return msg("dailyMsg", "Already claimed today!");
+
+  if (new Date(p.lastLogin).getTime() + 86400000 >= Date.now())
+    p.streak++;
+  else
+    p.streak = 1;
+
+  const reward = 200 + p.streak * 50;
+  p.balance += reward;
+  p.lastLogin = today;
+
+  save();
+  updateUI();
+  msg("dailyMsg", `+${reward} LUTT (Streak x${p.streak})`);
 }
 
-function dice() {
-  betGame("betDice", Math.ceil(Math.random()*6) > 3, 1, "diceResult");
+/* 📦 CASE OPENING */
+function openCase() {
+  const p = players[user];
+  if (p.lastCase === today)
+    return msg("caseResult", "Case already opened today!");
+
+  const rewards = [50, 100, 200, 500, 1000];
+  const reward = rewards[Math.floor(Math.random() * rewards.length)];
+
+  p.balance += reward;
+  p.lastCase = today;
+
+  save();
+  updateUI();
+  msg("caseResult", `📦 You won ${reward} LUTT!`);
 }
 
-function roulette() {
-  const pick = Number(document.getElementById("rouletteNum").value);
-  const bet = Number(document.getElementById("betRoulette").value);
-  if (bet <= 0 || bet > players[user].balance) return alert("Invalid bet");
+/* ⚔️ CASE BATTLE */
+function caseBattle() {
+  const bet = Number(document.getElementById("battleBet").value);
+  const p = players[user];
+  if (bet <= 0 || bet > p.balance) return alert("Invalid bet");
 
-  const spin = Math.floor(Math.random()*10);
-  if (spin === pick) {
-    players[user].balance += bet * 5;
-    document.getElementById("rouletteResult").innerText = "WIN! Number: " + spin;
+  const you = Math.floor(Math.random() * 1000);
+  const bot = Math.floor(Math.random() * 1000);
+
+  if (you > bot) {
+    p.balance += bet;
+    msg("battleResult", `You win! (${you} vs ${bot})`);
   } else {
-    players[user].balance -= bet;
-    document.getElementById("rouletteResult").innerText = "Lost. Number: " + spin;
+    p.balance -= bet;
+    msg("battleResult", `You lose! (${you} vs ${bot})`);
   }
-  save(); update();
+
+  save();
+  updateUI();
 }
 
-function blackjack() {
-  const bet = Number(document.getElementById("betBJ").value);
-  if (bet <= 0 || bet > players[user].balance) return alert("Invalid bet");
-
-  const player = Math.floor(Math.random()*10)+12;
-  const dealer = Math.floor(Math.random()*10)+12;
-
-  if (player > dealer && player <= 21 || dealer > 21) {
-    players[user].balance += bet;
-    document.getElementById("bjResult").innerText = "You win!";
-  } else {
-    players[user].balance -= bet;
-    document.getElementById("bjResult").innerText = "You lose!";
-  }
-  save(); update();
-}
-
-function betGame(inputId, win, multiplier, resultId) {
-  const bet = Number(document.getElementById(inputId).value);
-  if (bet <= 0 || bet > players[user].balance) return alert("Invalid bet");
-
-  players[user].balance += win ? bet * multiplier : -bet;
-  document.getElementById(resultId).innerText = win ? "You won!" : "You lost!";
-  save(); update();
-}
-
+/* 🏆 LEADERBOARD */
 function updateLeaderboard() {
   const list = document.getElementById("leaderboard");
   list.innerHTML = "";
   Object.entries(players)
     .sort((a,b)=>b[1].balance-a[1].balance)
-    .forEach(([name,data])=>{
+    .forEach(([n,d])=>{
       const li=document.createElement("li");
-      li.textContent=`${name}: ${data.balance} LUTT`;
+      li.textContent=`${n}: ${d.balance} LUTT`;
       list.appendChild(li);
     });
+}
+
+function msg(id, text) {
+  document.getElementById(id).innerText = text;
 }
