@@ -63,7 +63,12 @@
   <section id="caseOpen" class="gameTab hidden">
     <h2>Daily Case</h2>
     <button id="caseBtn">Open Case</button>
-    <div id="caseAnimation" class="case-animation hidden"></div>
+
+    <!-- Spinner container -->
+    <div id="caseSpinner" class="spinner-container hidden">
+      <div id="spinnerTrack" class="spinner-track"></div>
+    </div>
+
     <p id="caseResult"></p>
   </section>
 
@@ -105,7 +110,19 @@
     <h2>Case Battle</h2>
     <input id="battleBet" type="number" placeholder="Bet amount (LUTT)" min="1" />
     <button id="battleBtn">Battle Bot</button>
-    <div id="battleAnimation" class="case-animation hidden"></div>
+
+    <div id="battleSpinnerContainer" class="battle-spinner-container hidden">
+      <div class="spinner-container" id="playerSpinner">
+        <div class="spinner-track" id="playerSpinnerTrack"></div>
+        <div class="spinner-label">You</div>
+      </div>
+
+      <div class="spinner-container" id="botSpinner">
+        <div class="spinner-track" id="botSpinnerTrack"></div>
+        <div class="spinner-label">Bot</div>
+      </div>
+    </div>
+
     <p id="battleResult"></p>
   </section>
 
