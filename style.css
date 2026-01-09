@@ -183,27 +183,55 @@ nav button:hover {
   overflow: hidden;
 }
 
-/* Blackjack cards area */
-#blackjackCards {
-  margin-top: 15px;
+/* Blackjack Table */
+
+.table {
+  background: #004400;
+  border-radius: 15px;
+  padding: 15px;
+  max-width: 500px;
+  margin: 20px auto;
+  box-shadow: 0 0 20px #00ff99aa;
+  color: white;
+}
+
+.cards {
   display: flex;
+  gap: 10px;
   justify-content: center;
-  gap: 15px;
+  margin: 10px 0;
 }
 
 .cardVisual {
-  width: 70px;
-  height: 100px;
-  border-radius: 10px;
+  width: 60px;
+  height: 90px;
   background: white;
+  border-radius: 10px;
+  box-shadow: 0 0 6px #00ff99;
   color: black;
   font-weight: bold;
   font-size: 24px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-shadow: 2px 2px 6px #007744;
+  text-align: center;
+  line-height: 90px;
   user-select: none;
+  transition: transform 0.4s ease;
+}
+
+.controls button {
+  margin: 10px 8px 0 8px;
+  padding: 10px 15px;
+  font-weight: bold;
+  background: #00ff99;
+  color: #004400;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.controls button:disabled {
+  background: #666;
+  cursor: not-allowed;
 }
 
 /* Roulette wheel */
