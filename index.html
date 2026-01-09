@@ -5,103 +5,99 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>LUTT Casino</title>
   <link rel="stylesheet" href="style.css" />
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
-  <div id="loginScreen">
-    <h1>Login or Sign Up</h1>
-    <input id="email" type="email" placeholder="Email" />
-    <input id="password" type="password" placeholder="Password" />
-    <input id="username" type="text" placeholder="Username (for leaderboard)" />
-    <button id="signUpBtn">Sign Up</button>
+  <header>
+    <h1>LUTT Casino 🎲</h1>
+  </header>
+
+  <!-- Login Section -->
+  <section id="loginSection">
+    <h2>Login or Sign Up</h2>
+    <input id="emailInput" type="email" placeholder="Email" />
+    <input id="passwordInput" type="password" placeholder="Password" />
+    <input id="usernameInput" type="text" placeholder="Choose Username" />
+    <button id="signupBtn">Sign Up</button>
     <button id="loginBtn">Log In</button>
-  </div>
+    <button id="logoutBtn" class="hidden">Log Out</button>
+    <p id="authMsg"></p>
+  </section>
 
-  <div id="gameScreen" class="hidden">
-    <header>
-      <span>Welcome, <span id="displayUsername"></span></span>
-      <button id="logoutBtn">Log Out</button>
-    </header>
+  <!-- Main App Section -->
+  <section id="app" class="hidden">
+    <div id="balanceDisplay">Balance: <span id="balanceAmount">0</span> LUTT</div>
 
-    <nav>
-      <button data-tab="dashboard">Dashboard</button>
-      <button data-tab="blackjack">Blackjack</button>
-      <button data-tab="caseBattle">Case Battle PvP</button>
-      <button data-tab="leaderboard">Leaderboard</button>
+    <nav class="nav-bar">
+      <button data-tab="dashboard" class="nav-btn active">Dashboard</button>
+      <button data-tab="blackjack" class="nav-btn">Blackjack</button>
+      <button data-tab="highlow" class="nav-btn">High-Low 🃏</button>
+      <button data-tab="plinko" class="nav-btn">Plinko 🎯</button>
+      <button data-tab="caseBattle" class="nav-btn">Case Battle PvP</button>
+      <button data-tab="leaderboard" class="nav-btn">Leaderboard</button>
     </nav>
 
     <section id="dashboard" class="gameTab">
-      <h2>Dashboard</h2>
-      <p>Balance: <span id="balance">0</span> LUTT</p>
-      <p>Daily Login Streak: <span id="streak">0</span></p>
-      <button id="dailyBonusBtn">Claim Daily Bonus</button>
-      <p id="dailyMsg"></p>
+      <h2>Welcome to LUTT Casino!</h2>
+      <p>Choose a game above to start playing.</p>
     </section>
 
+    <!-- Blackjack Section -->
     <section id="blackjack" class="gameTab hidden">
-      <h2>Blackjack</h2>
-      <p>Balance: <span id="balanceBlackjack">0</span> LUTT</p>
-      <label>Wager:
-        <input id="blackjackWager" type="number" min="1" placeholder="Enter wager" />
-      </label>
-      <button id="blackjackPlayBtn">Start Blackjack</button>
-      <div id="dealerHand" class="hand"></div>
-      <div id="playerHand" class="hand"></div>
-      <p id="blackjackResult"></p>
-      <button id="hitBtn" disabled>Hit</button>
-      <button id="standBtn" disabled>Stand</button>
-      <button id="doubleBtn" disabled>Double</button>
+      <!-- Your existing Blackjack UI & code goes here -->
     </section>
 
-    <section id="caseBattle" class="gameTab hidden">
-      <h2>Case Battle PvP</h2>
-      <p>Balance: <span id="balanceCaseBattle">0</span> LUTT</p>
-
-      <label>
-        Wager (LUTT):
-        <input id="battleWager" type="number" min="1" placeholder="Enter wager" />
+    <!-- High-Low Section -->
+    <section id="highlow" class="gameTab hidden">
+      <h3>High-Low 🃏</h3>
+      <label>Wager:
+        <input id="highlowWager" type="number" min="1" placeholder="Enter wager" />
       </label>
+      <button id="startHighLowBtn" class="btn primary">Start Game</button>
 
-      <label>
-        Number of cases:
-        <input id="battleCases" type="number" min="1" max="10" value="3" />
+      <div id="highlowGame" class="hidden">
+        <div id="currentCard" class="cardVisual" style="font-size: 80px; margin: 20px auto;">🂠</div>
+        <div class="highlow-buttons">
+          <button id="guessHigherBtn" class="btn secondary">Higher</button>
+          <button id="guessLowerBtn" class="btn secondary">Lower</button>
+        </div>
+        <p id="highlowMsg" class="result-msg"></p>
+        <p>Current Streak: <span id="highlowStreak">0</span></p>
+      </div>
+    </section>
+
+    <!-- Plinko Section -->
+    <section id="plinko" class="gameTab hidden">
+      <h3>Plinko 🎯</h3>
+      <label>Wager:
+        <input id="plinkoWager" type="number" min="1" placeholder="Enter wager" />
       </label>
-
-      <label>
-        Case type:
-        <select id="battleCaseType">
-          <option value="cheap">Cheap Cases (100 LUTT each)</option>
-          <option value="medium">Medium Cases (300 LUTT each)</option>
-          <option value="expensive">Expensive Cases (1000 LUTT each)</option>
+      <label>Difficulty:
+        <select id="plinkoDifficulty">
+          <option value="easy" selected>Easy</option>
+          <option value="medium">Medium</option>
+          <option value="hard">Hard</option>
         </select>
       </label>
-
-      <button id="createBattleBtn">Create Battle</button>
-      <button id="joinBattleBtn" disabled>Join Selected Battle</button>
-
-      <h3>Active Battles:</h3>
-      <ul id="activeBattlesList"></ul>
-
-      <div id="battleSpinnerContainer" class="battle-spinner-container hidden">
-        <div class="spinner-container" id="playerSpinner">
-          <div class="spinner-track" id="playerSpinnerTrack"></div>
-          <div class="spinner-label">You</div>
-        </div>
-        <div class="spinner-container" id="opponentSpinner">
-          <div class="spinner-track" id="opponentSpinnerTrack"></div>
-          <div class="spinner-label">Opponent</div>
-        </div>
-      </div>
-      <p id="battleResult"></p>
+      <button id="plinkoStartBtn" class="btn primary">Drop Ball</button>
+      <div id="plinkoBoard" class="plinko-board"></div>
+      <p id="plinkoResult" class="result-msg"></p>
     </section>
 
+    <!-- Case Battle Section -->
+    <section id="caseBattle" class="gameTab hidden">
+      <!-- Your existing Case Battle UI & code -->
+    </section>
+
+    <!-- Leaderboard Section -->
     <section id="leaderboard" class="gameTab hidden">
-      <h2>Leaderboard</h2>
+      <h3>Leaderboard</h3>
       <ul id="leaderboardList"></ul>
     </section>
-  </div>
+  </section>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
   <script src="script.js"></script>
 </body>
