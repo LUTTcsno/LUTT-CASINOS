@@ -23,26 +23,21 @@ document.addEventListener("DOMContentLoaded", () => {
   const dailyMsg = document.getElementById("dailyMsg");
   const caseResult = document.getElementById("caseResult");
   const battleResult = document.getElementById("battleResult");
-  const battleAnimation = document.getElementById("battleAnimation");
 
-  const blackjackPlayBtn = document.getElementById("blackjackPlayBtn");
-  const blackjackResult = document.getElementById("blackjackResult");
-  const blackjackCardsDiv = document.getElementById("blackjackCards");
+  const caseSpinner = document.getElementById("caseSpinner");
+  const spinnerTrack = document.getElementById("spinnerTrack");
 
-  const rouletteSpinBtn = document.getElementById("rouletteSpinBtn");
-  const rouletteResult = document.getElementById("rouletteResult");
-  const rouletteWheelDiv = document.getElementById("rouletteWheel");
-
-  const pokerPlayBtn = document.getElementById("pokerPlayBtn");
-  const pokerResult = document.getElementById("pokerResult");
-
-  const baccaratPlayBtn = document.getElementById("baccaratPlayBtn");
-  const baccaratResult = document.getElementById("baccaratResult");
+  const playerSpinnerTrack = document.getElementById("playerSpinnerTrack");
+  const botSpinnerTrack = document.getElementById("botSpinnerTrack");
+  const battleSpinnerContainer = document.getElementById("battleSpinnerContainer");
 
   const leaderboardList = document.getElementById("leaderboardList");
 
   let currentUser = null;
   let currentUserData = null;
+
+  // Prize list
+  const prizes = [100, 200, 300, 500, 1000];
 
   function showGameTab(tabName) {
     gameTabs.forEach(tab => {
@@ -56,10 +51,6 @@ document.addEventListener("DOMContentLoaded", () => {
     dailyMsg.innerText = "";
     caseResult.innerText = "";
     battleResult.innerText = "";
-    blackjackResult.innerText = "";
-    rouletteResult.innerText = "";
-    pokerResult.innerText = "";
-    baccaratResult.innerText = "";
   }
 
   function showLogin() {
@@ -192,64 +183,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Daily Bonus
-  dailyBonusBtn.addEventListener("click", async () => {
+  document.getElementById("dailyBonusBtn").addEventListener("click", async () => {
     if (!currentUser) return alert("Please log in");
 
     const userDoc = db.collection("users").doc(currentUser.uid);
     const doc = await userDoc.get();
-    let data = doc.data();
-
-    const today = new Date().toDateString();
-
-    if (data.lastLogin === today) {
-      dailyMsg.innerText = "Already claimed today!";
-      return;
-    }
-
-    let yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    if (data.lastLogin === yesterday.toDateString()) {
-      data.streak++;
-    } else {
-      data.streak = 1;
-    }
-
-    const reward = 200 + data.streak * 50;
-    data.balance += reward;
-    data.lastLogin = today;
-
-    await saveUserData(data);
-    balanceSpan.innerText = data.balance;
-    streakSpan.innerText = data.streak;
-    dailyMsg.innerText = `+${reward} LUTT (Streak x${data.streak})`;
-  });
-
-  // Daily Case
-  caseBtn.addEventListener("click", async () => {
-    if (!currentUser) return alert("Please log in");
-
-    const userDoc = db.collection("users").doc(currentUser.uid);
-    const doc = await userDoc.get();
-    let data = doc.data();
-
-    const today = new Date().toDateString();
-    if (data.lastCase === today) {
-      caseResult.innerText = "Case already opened today.";
-      return;
-    }
-
-    caseResult.innerText = "";
-    const caseAnimation = document.getElementById("caseAnimation");
-    caseAnimation.classList.remove("hidden");
-
-    setTimeout(async () => {
-      caseAnimation.classList.add("hidden");
-
-      const rewards = [100, 200, 300, 500, 1000];
-      const reward = rewards[Math.floor(Math.random() * rewards.length)];
-      data.balance += reward;
-      data.lastCase = today;
-      await saveUserData(data);
-      balanceSpan.innerText = data.balance;
-      caseResult.innerText = `You got +${reward} LUT
+    let
