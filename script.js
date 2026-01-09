@@ -731,6 +731,183 @@ cashoutCrashBtn.addEventListener("click", () => {
   alert(`You cashed out at ${crashMultiplier.toFixed(2)}x! You won ${winnings.toFixed(2)} LUTT!`);
 });
 
+// ------------- GLOBAL CHAT -------------
+const chatMessagesDiv = document.getElementById("chat-messages");
+const chatInput = document.getElementById("chat-input");
+const chatSendBtn = document.getElementById("chat-send-btn");
+
+chatSendBtn.addEventListener("click", async () => {
+  const message = chatInput.value.trim();
+  if (!message || !currentUser) return;
+
+  await db.collection("globalChat").add({
+    uid: currentUser.uid,
+    username: currentUserData.username || "Anon",
+    message,
+    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  chatInput.value = "";
+});
+
+db.collection("globalChat").orderBy("timestamp", "asc").limit(100).onSnapshot(snapshot => {
+  chatMessagesDiv.innerHTML = "";
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    const msgDiv = document.createElement("div");
+    msgDiv.classList.add("chat-message");
+    msgDiv.textContent = `${data.username}: ${data.message}`;
+    chatMessagesDiv.appendChild(msgDiv);
+  });
+  chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
+});
+
+// ------------- DAILY LEADERBOARD -------------
+async function updateDailyLeaderboard() {
+  const todayKey = new Date().toISOString().slice(0,10);
+  const snapshot = await db.collection("dailyStats").doc(todayKey).collection("users").orderBy("balance", "desc").limit(10).get();
+  const dailyList = document.getElementById("daily-leaderboard-list");
+  dailyList.innerHTML = "";
+  snapshot.forEach(doc => {
+    const user = doc.data();
+    const li = document.createElement("li");
+    li.textContent = `${user.username || "Anon"} - ${user.balance.toFixed(2)} LUTT`;
+    dailyList.appendChild(li);
+  });
+}
+
+async function updateDailyStats() {
+  if (!currentUser) return;
+  const todayKey = new Date().toISOString().slice(0,10);
+  const userDoc = db.collection("dailyStats").doc(todayKey).collection("users").doc(currentUser.uid);
+  await userDoc.set({
+    username: currentUserData.username || "Anon",
+    balance: currentUserData.balance,
+    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  updateDailyLeaderboard();
+}
+
+// Modify your saveUserData function to call updateDailyStats:
+async function saveUserData(data) {
+  if (!currentUser) return;
+  await db.collection("users").doc(currentUser.uid).set(data);
+  currentUserData = data;
+  updateUI();
+  updateLeaderboard();
+  await updateDailyStats();
+}
+
+// ------------- FREE BOX TIMER & CLAIM -------------
+const freeBoxBtn = document.getElementById("free-box-btn");
+const freeBoxTimerDiv = document.getElementById("free-box-timer");
+let freeBoxLastClaim = 0;
+
+async function loadFreeBoxClaim() {
+  if (!currentUser) return;
+  const doc = await db.collection("freeBoxClaims").doc(currentUser.uid).get();
+  freeBoxLastClaim = doc.exists ? doc.data().lastClaim || 0 : 0;
+  updateFreeBoxTimer();
+}
+
+function updateFreeBoxTimer() {
+  const now = Date.now();
+  const elapsed = now - freeBoxLastClaim;
+  const cooldown = 30 * 60 * 1000;
+  const remaining = cooldown - elapsed;
+  if (remaining <= 0) {
+    freeBoxBtn.disabled = false;
+    freeBoxTimerDiv.textContent = "Free box ready!";
+  } else {
+    freeBoxBtn.disabled = true;
+    const min = Math.floor(remaining / 60000);
+    const sec = Math.floor((remaining % 60000) / 1000);
+    freeBoxTimerDiv.textContent = `Next free box in: ${min.toString().padStart(2,"0")}:${sec.toString().padStart(2,"0")}`;
+    setTimeout(updateFreeBoxTimer, 1000);
+  }
+}
+
+freeBoxBtn.addEventListener("click", async () => {
+  if (freeBoxBtn.disabled || !currentUser) return;
+  const reward = Math.floor(Math.random() * 91) + 10;
+  currentUserData.balance += reward;
+  await saveUserData(currentUserData);
+  freeBoxLastClaim = Date.now();
+  await db.collection("freeBoxClaims").doc(currentUser.uid).set({ lastClaim: freeBoxLastClaim });
+  alert(`You claimed a free box with ${reward} LUTT!`);
+  updateFreeBoxTimer();
+});
+
+// Load free box claim info on login:
+auth.onAuthStateChanged(user => {
+  if (user) {
+    loadUserData(user.uid);
+    loadFreeBoxClaim();
+  } else {
+    showLogin();
+  }
+});
+
+// ------------- MINES CASHOUT BUTTON -------------
+const minesCashoutBtn = document.getElementById("mines-cashout-btn");
+
+minesCashoutBtn.addEventListener("click", () => {
+  if (!minesGameActive) return;
+  const safeCells = minesGridData.filter(c => !c.isMine && c.revealed).length;
+  const payout = minesWager * (safeCells * 0.3);
+  if (payout > 0) {
+    alert(`You cashed out and won ${payout.toFixed(2)} LUTT!`);
+    currentUserData.balance += payout;
+    saveUserData(currentUserData);
+  } else {
+    alert("No safe cells revealed, no payout.");
+  }
+  minesGameActive = false;
+  minesCashoutBtn.disabled = true;
+  minesGridData.forEach(c => c.revealed = true);
+});
+
+// Modify existing mine click handler in your code to enable cashout button on safe reveal:
+function onMineCellClick(idx) {
+  if (!minesGameActive) return;
+  const cellData = minesGridData[idx];
+  if (cellData.revealed) return;
+
+  if (cellData.isMine) {
+    cellData.element.textContent = "💣";
+    cellData.element.style.backgroundColor = "#a00";
+    alert("You hit a mine! Game over.");
+    minesGameActive = false;
+    minesCashoutBtn.disabled = true;
+  } else {
+    cellData.element.textContent = "✔️";
+    cellData.element.style.backgroundColor = "#0a0";
+    cellData.revealed = true;
+    minesCashoutBtn.disabled = false; // enable cashout
+  }
+}
+
+// ------------- PLINKO MULTIPLIERS LOWER -------------
+// Replace your plinko payout function with this:
+function normalDistributionPayouts(cols, difficulty) {
+  const payouts = [];
+  const center = cols / 2;
+  let basePayout;
+  switch (difficulty) {
+    case "easy": basePayout = 0.5; break;
+    case "medium": basePayout = 0.75; break;
+    case "hard": basePayout = 1.0; break;
+    default: basePayout = 0.5;
+  }
+  for (let i = 0; i < cols; i++) {
+    const dist = Math.abs(i - center);
+    const multiplier = basePayout + dist * 0.25;
+    payouts.push(Math.round(multiplier * 100) / 100);
+  }
+  return payouts;
+}
+
+
 // --- Initial Setup ---
 updateLeaderboard();
 generatePlinkoBoard();
