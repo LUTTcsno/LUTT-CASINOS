@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>LUTT Casino</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <title>LUTT Visual Casino</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<h1>🎮 LUTT Arena</h1>
-<p class="disclaimer">Play-money only. LUTT has no real-world value.</p>
+<h1>🎮 LUTT Visual Casino</h1>
+<p class="disclaimer">Play-money only. LUTT has no real value.</p>
 
 <div id="login" class="card">
-  <input id="username" placeholder="Username">
+  <input id="username" placeholder="Username" />
   <button onclick="login()">Login</button>
 </div>
 
@@ -21,20 +21,22 @@
 
   <div class="card">
     <h3>🎁 Daily Bonus</h3>
-    <button onclick="claimDaily()">Claim Bonus</button>
+    <button id="dailyBonusBtn" onclick="claimDaily()">Claim Bonus</button>
     <p id="dailyMsg"></p>
   </div>
 
   <div class="card">
     <h3>📦 Daily Case</h3>
-    <button onclick="openCase()">Open Case</button>
+    <button id="caseBtn" onclick="openCase()">Open Case</button>
+    <div id="caseAnimation" class="case-animation hidden"></div>
     <p id="caseResult"></p>
   </div>
 
   <div class="card">
     <h3>⚔️ Case Battle (vs Bot)</h3>
-    <input id="battleBet" type="number" placeholder="Entry LUTT">
+    <input id="battleBet" type="number" placeholder="Entry LUTT" />
     <button onclick="caseBattle()">Battle</button>
+    <div id="battleAnimation" class="case-animation hidden"></div>
     <p id="battleResult"></p>
   </div>
 
@@ -47,5 +49,6 @@
 </div>
 
 <script src="script.js"></script>
+
 </body>
 </html>
