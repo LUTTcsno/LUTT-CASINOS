@@ -2,149 +2,107 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>LUTT Visual Casino</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LUTT Casino</title>
   <link rel="stylesheet" href="style.css" />
-
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyD6CNjm2upOaD4BP3f7MBUPh0u1IDkHjh4",
-      authDomain: "lutt-casinos.firebaseapp.com",
-      projectId: "lutt-casinos",
-      storageBucket: "lutt-casinos.firebasestorage.app",
-      messagingSenderId: "1061450870530",
-      appId: "1:1061450870530:web:27cd82b5e433cc6320dc1b",
-      measurementId: "G-TXJY4VLCHV"
-    };
-    firebase.initializeApp(firebaseConfig);
-  </script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
-
-<header>
-  <h1>LUTT Visual Casino</h1>
-  <div id="userInfo" class="hidden">
-    Logged in as: <span id="userNameDisplay"></span> |
-    Balance: <span id="balance"></span> LUTT |
-    Streak: <span id="streak"></span> days
-    <button id="logoutBtn">Logout</button>
+  <div id="loginScreen">
+    <h1>Login or Sign Up</h1>
+    <input id="email" type="email" placeholder="Email" />
+    <input id="password" type="password" placeholder="Password" />
+    <input id="username" type="text" placeholder="Username (for leaderboard)" />
+    <button id="signUpBtn">Sign Up</button>
+    <button id="loginBtn">Log In</button>
   </div>
-</header>
 
-<div id="login" class="card">
-  <input id="username" type="text" placeholder="Choose a username" autocomplete="username" />
-  <input id="email" type="email" placeholder="Email" autocomplete="username" />
-  <input id="password" type="password" placeholder="Password" autocomplete="current-password" />
-  <button id="signUpBtn">Sign Up</button>
-  <button id="loginBtn">Login</button>
-</div>
+  <div id="gameScreen" class="hidden">
+    <header>
+      <span>Welcome, <span id="displayUsername"></span></span>
+      <button id="logoutBtn">Log Out</button>
+    </header>
 
-<nav id="nav" class="hidden">
-  <button data-tab="dailyBonus">🎁 Daily Bonus</button>
-  <button data-tab="caseOpen">📦 Daily Case</button>
-  <button data-tab="blackjack">♠️ Blackjack</button>
-  <button data-tab="roulette">🎡 Roulette</button>
-  <button data-tab="poker">🃏 Poker</button>
-  <button data-tab="baccarat">♣️ Baccarat</button>
-  <button data-tab="caseBattle">⚔️ Case Battle</button>
-  <button data-tab="leaderboard">🏆 Leaderboard</button>
-</nav>
+    <nav>
+      <button data-tab="dashboard">Dashboard</button>
+      <button data-tab="blackjack">Blackjack</button>
+      <button data-tab="caseBattle">Case Battle PvP</button>
+      <button data-tab="leaderboard">Leaderboard</button>
+    </nav>
 
-<main>
-  <section id="dailyBonus" class="gameTab hidden">
-    <h2>Daily Bonus</h2>
-    <button id="dailyBonusBtn">Claim Bonus</button>
-    <p id="dailyMsg"></p>
-  </section>
+    <section id="dashboard" class="gameTab">
+      <h2>Dashboard</h2>
+      <p>Balance: <span id="balance">0</span> LUTT</p>
+      <p>Daily Login Streak: <span id="streak">0</span></p>
+      <button id="dailyBonusBtn">Claim Daily Bonus</button>
+      <p id="dailyMsg"></p>
+    </section>
 
-  <section id="caseOpen" class="gameTab hidden">
-    <h2>Daily Case</h2>
-    <button id="caseBtn">Open Case</button>
-    <div id="caseSpinner" class="spinner-container hidden">
-      <div id="spinnerTrack" class="spinner-track"></div>
-    </div>
-    <p id="caseResult"></p>
-  </section>
-
-  <section id="blackjack" class="gameTab hidden">
-    <h2>Blackjack</h2>
-    <div id="blackjackTable" class="table">
-      <div class="dealerArea">
-        <h3>Dealer</h3>
-        <div id="dealerCards" class="cards"></div>
-      </div>
-
-      <div class="playerArea">
-        <h3>You</h3>
-        <div id="playerCards" class="cards"></div>
-      </div>
-
-      <div class="controls">
-        <button id="hitBtn" disabled>Hit</button>
-        <button id="standBtn" disabled>Stand</button>
-        <button id="doubleBtn" disabled>Double Down</button>
-      </div>
-
+    <section id="blackjack" class="gameTab hidden">
+      <h2>Blackjack</h2>
+      <p>Balance: <span id="balanceBlackjack">0</span> LUTT</p>
+      <label>Wager:
+        <input id="blackjackWager" type="number" min="1" placeholder="Enter wager" />
+      </label>
+      <button id="blackjackPlayBtn">Start Blackjack</button>
+      <div id="dealerHand" class="hand"></div>
+      <div id="playerHand" class="hand"></div>
       <p id="blackjackResult"></p>
-      <button id="blackjackPlayBtn">Start Blackjack (100 LUTT bet)</button>
-    </div>
-  </section>
+      <button id="hitBtn" disabled>Hit</button>
+      <button id="standBtn" disabled>Stand</button>
+      <button id="doubleBtn" disabled>Double</button>
+    </section>
 
-  <section id="roulette" class="gameTab hidden">
-    <h2>Roulette</h2>
-    <div id="rouletteArea" class="gameArea">
-      <button id="rouletteSpinBtn">Spin Roulette (50 LUTT bet)</button>
-      <div id="rouletteWheel" class="roulette-wheel"></div>
-      <p id="rouletteResult"></p>
-    </div>
-  </section>
+    <section id="caseBattle" class="gameTab hidden">
+      <h2>Case Battle PvP</h2>
+      <p>Balance: <span id="balanceCaseBattle">0</span> LUTT</p>
 
-  <section id="poker" class="gameTab hidden">
-    <h2>Poker (Simplified)</h2>
-    <div id="pokerArea" class="gameArea">
-      <button id="pokerPlayBtn">Play Poker (150 LUTT bet)</button>
-      <p id="pokerResult"></p>
-    </div>
-  </section>
+      <label>
+        Wager (LUTT):
+        <input id="battleWager" type="number" min="1" placeholder="Enter wager" />
+      </label>
 
-  <section id="baccarat" class="gameTab hidden">
-    <h2>Baccarat</h2>
-    <div id="baccaratArea" class="gameArea">
-      <button id="baccaratPlayBtn">Play Baccarat (100 LUTT bet)</button>
-      <p id="baccaratResult"></p>
-    </div>
-  </section>
+      <label>
+        Number of cases:
+        <input id="battleCases" type="number" min="1" max="10" value="3" />
+      </label>
 
-  <section id="caseBattle" class="gameTab hidden">
-    <h2>Case Battle</h2>
-    <input id="battleBet" type="number" placeholder="Bet amount (LUTT)" min="1" />
-    <button id="battleBtn">Battle Bot</button>
+      <label>
+        Case type:
+        <select id="battleCaseType">
+          <option value="cheap">Cheap Cases (100 LUTT each)</option>
+          <option value="medium">Medium Cases (300 LUTT each)</option>
+          <option value="expensive">Expensive Cases (1000 LUTT each)</option>
+        </select>
+      </label>
 
-    <div id="battleSpinnerContainer" class="battle-spinner-container hidden">
-      <div class="spinner-container" id="playerSpinner">
-        <div class="spinner-track" id="playerSpinnerTrack"></div>
-        <div class="spinner-label">You</div>
+      <button id="createBattleBtn">Create Battle</button>
+      <button id="joinBattleBtn" disabled>Join Selected Battle</button>
+
+      <h3>Active Battles:</h3>
+      <ul id="activeBattlesList"></ul>
+
+      <div id="battleSpinnerContainer" class="battle-spinner-container hidden">
+        <div class="spinner-container" id="playerSpinner">
+          <div class="spinner-track" id="playerSpinnerTrack"></div>
+          <div class="spinner-label">You</div>
+        </div>
+        <div class="spinner-container" id="opponentSpinner">
+          <div class="spinner-track" id="opponentSpinnerTrack"></div>
+          <div class="spinner-label">Opponent</div>
+        </div>
       </div>
+      <p id="battleResult"></p>
+    </section>
 
-      <div class="spinner-container" id="botSpinner">
-        <div class="spinner-track" id="botSpinnerTrack"></div>
-        <div class="spinner-label">Bot</div>
-      </div>
-    </div>
+    <section id="leaderboard" class="gameTab hidden">
+      <h2>Leaderboard</h2>
+      <ul id="leaderboardList"></ul>
+    </section>
+  </div>
 
-    <p id="battleResult"></p>
-  </section>
-
-  <section id="leaderboard" class="gameTab hidden">
-    <h2>Leaderboard</h2>
-    <ul id="leaderboardList"></ul>
-  </section>
-</main>
-
-<script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
