@@ -1,4 +1,4 @@
-// Firebase configuration
+// Your Firebase config (replace with your own keys)
 const firebaseConfig = {
   apiKey: "AIzaSyD6CNjm2upOaD4BP3f7MBUPh0u1IDkHjh4",
   authDomain: "lutt-casinos.firebaseapp.com",
@@ -14,117 +14,117 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// DOM Elements
-const loginSection = document.getElementById("loginSection");
-const appSection = document.getElementById("app");
-
+// ELEMENTS
 const emailInput = document.getElementById("emailInput");
 const passwordInput = document.getElementById("passwordInput");
 const usernameInput = document.getElementById("usernameInput");
-
 const signupBtn = document.getElementById("signupBtn");
 const loginBtn = document.getElementById("loginBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const authMsg = document.getElementById("authMsg");
+const loginSection = document.getElementById("loginSection");
+const appSection = document.getElementById("appSection");
+const usernameDisplay = document.getElementById("usernameDisplay");
+const balanceDisplay = document.getElementById("balanceDisplay");
 
-const balanceAmount = document.getElementById("balanceAmount");
-
-const navBtns = document.querySelectorAll(".nav-btn");
+// NAVIGATION
+const navButtons = document.querySelectorAll(".nav-btn");
 const gameTabs = document.querySelectorAll(".gameTab");
 
-let currentUserData = null;
-let currentUserId = null;
-
-// Show / Hide Tabs
 function showGameTab(tabName) {
   gameTabs.forEach(tab => {
-    tab.classList.toggle("hidden", tab.id !== tabName);
+    if (tab.id === tabName) {
+      tab.classList.remove("hidden");
+    } else {
+      tab.classList.add("hidden");
+    }
   });
-  navBtns.forEach(btn => {
-    btn.classList.toggle("active", btn.getAttribute("data-tab") === tabName);
+  navButtons.forEach(btn => {
+    if (btn.dataset.tab === tabName) {
+      btn.classList.add("active");
+    } else {
+      btn.classList.remove("active");
+    }
   });
 }
 
-// Initialize tab nav listeners
-navBtns.forEach(btn => {
+// NAV BUTTONS LISTENER
+navButtons.forEach(btn => {
   btn.addEventListener("click", () => {
-    showGameTab(btn.getAttribute("data-tab"));
+    showGameTab(btn.dataset.tab);
   });
 });
 
-// Auth functions
-async function saveUserData(userData) {
+// USER DATA
+let currentUserId = null;
+let currentUserData = null;
+
+async function saveUserData(data) {
   if (!currentUserId) return;
-  await db.collection("users").doc(currentUserId).set(userData);
+  await db.collection("users").doc(currentUserId).set(data);
 }
 
-async function loadUserData(userId) {
-  const doc = await db.collection("users").doc(userId).get();
-  if (doc.exists) return doc.data();
-  return null;
+async function loadUserData(uid) {
+  const doc = await db.collection("users").doc(uid).get();
+  return doc.exists ? doc.data() : null;
 }
 
-function updateBalances(data) {
-  balanceAmount.textContent = data.balance ?? 0;
+function updateBalances(userData) {
+  usernameDisplay.textContent = userData.username || "Anonymous";
+  balanceDisplay.textContent = userData.balance.toFixed(2);
 }
 
-// Sign Up
+// SIGNUP
 signupBtn.addEventListener("click", async () => {
+  authMsg.textContent = "";
   const email = emailInput.value.trim();
   const password = passwordInput.value;
-  const username = usernameInput.value.trim() || "Anonymous";
+  const username = usernameInput.value.trim();
 
-  if (!email || !password) {
-    authMsg.textContent = "Email and password required.";
+  if (!email || !password || !username) {
+    authMsg.textContent = "Please fill all fields";
     return;
   }
-  if (username.length < 3) {
-    authMsg.textContent = "Username must be at least 3 characters.";
-    return;
-  }
-
   try {
     const userCredential = await auth.createUserWithEmailAndPassword(email, password);
     currentUserId = userCredential.user.uid;
-    currentUserData = {
-      username,
-      balance: 1000,
-      luttsEarned: 0,
-      createdAt: new Date(),
-    };
+    currentUserData = { username, balance: 1000, createdAt: new Date() };
     await saveUserData(currentUserData);
-    authMsg.textContent = "Account created! Logged in.";
+    loginSection.classList.add("hidden");
+    appSection.classList.remove("hidden");
+    updateBalances(currentUserData);
   } catch (error) {
     authMsg.textContent = error.message;
   }
 });
 
-// Log In
+// LOGIN
 loginBtn.addEventListener("click", async () => {
+  authMsg.textContent = "";
   const email = emailInput.value.trim();
   const password = passwordInput.value;
 
   if (!email || !password) {
-    authMsg.textContent = "Email and password required.";
+    authMsg.textContent = "Please enter email and password";
     return;
   }
-
   try {
     const userCredential = await auth.signInWithEmailAndPassword(email, password);
     currentUserId = userCredential.user.uid;
     currentUserData = await loadUserData(currentUserId);
     if (!currentUserData) {
-      // New user record in DB
-      currentUserData = { username: "Anonymous", balance: 1000, luttsEarned: 0, createdAt: new Date() };
+      currentUserData = { username: "Anonymous", balance: 1000, createdAt: new Date() };
       await saveUserData(currentUserData);
     }
-    authMsg.textContent = "Logged in successfully!";
+    loginSection.classList.add("hidden");
+    appSection.classList.remove("hidden");
+    updateBalances(currentUserData);
   } catch (error) {
     authMsg.textContent = error.message;
   }
 });
 
-// Log Out
+// LOGOUT
 logoutBtn.addEventListener("click", async () => {
   await auth.signOut();
   currentUserId = null;
@@ -137,48 +137,349 @@ logoutBtn.addEventListener("click", async () => {
   usernameInput.value = "";
 });
 
-// Auth state observer
+// AUTH STATE CHANGE
 auth.onAuthStateChanged(async (user) => {
   if (user) {
     currentUserId = user.uid;
     currentUserData = await loadUserData(currentUserId);
     if (!currentUserData) {
-      currentUserData = { username: "Anonymous", balance: 1000, luttsEarned: 0, createdAt: new Date() };
+      currentUserData = { username: "Anonymous", balance: 1000, createdAt: new Date() };
       await saveUserData(currentUserData);
     }
     loginSection.classList.add("hidden");
     appSection.classList.remove("hidden");
-    logoutBtn.classList.remove("hidden");
     updateBalances(currentUserData);
-    showGameTab("dashboard");
-    authMsg.textContent = "";
   } else {
     currentUserId = null;
     currentUserData = null;
     loginSection.classList.remove("hidden");
     appSection.classList.add("hidden");
-    logoutBtn.classList.add("hidden");
   }
 });
 
-/* ------------------------------
-     HIGH-LOW GAME IMPLEMENTATION
--------------------------------- */
+// --- UPDATE LEADERBOARD ---
+const leaderboardList = document.getElementById("leaderboardList");
+
+async function updateLeaderboard() {
+  const snapshot = await db.collection("users").orderBy("balance", "desc").limit(10).get();
+  leaderboardList.innerHTML = "";
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    const li = document.createElement("li");
+    li.textContent = `${data.username || "Anonymous"} — ${data.balance.toFixed(2)} LUTT`;
+    leaderboardList.appendChild(li);
+  });
+}
+
+// Refresh leaderboard every 10 seconds
+setInterval(() => {
+  if (appSection.classList.contains("hidden")) return;
+  updateLeaderboard();
+}, 10000);
+updateLeaderboard();
+
+// --------------- GAME LOGIC BELOW ---------------
+
+// --- SLOT MACHINE ---
+const slotsWagerInput = document.getElementById("slotsWager");
+const spinSlotsBtn = document.getElementById("spinSlotsBtn");
+const slotsResult = document.getElementById("slotsResult");
+const slotsVisual = document.getElementById("slotsVisual");
+
+const slotSymbols = ["🍒", "🍋", "🍉", "⭐", "7️⃣", "💎"];
+
+spinSlotsBtn.addEventListener("click", spinSlots);
+
+function spinSlots() {
+  if (!currentUserData) {
+    alert("Please log in to play!");
+    return;
+  }
+  const wager = parseInt(slotsWagerInput.value);
+  if (!wager || wager < 1) {
+    alert("Enter a valid wager.");
+    return;
+  }
+  if (wager > currentUserData.balance) {
+    alert("Insufficient balance.");
+    return;
+  }
+  currentUserData.balance -= wager;
+  saveUserData(currentUserData);
+  updateBalances(currentUserData);
+
+  spinSlotsBtn.disabled = true;
+  slotsResult.textContent = "";
+  slotsVisual.textContent = "🎰🎰🎰";
+
+  let spins = 20;
+  let interval = setInterval(() => {
+    const reel1 = slotSymbols[Math.floor(Math.random() * slotSymbols.length)];
+    const reel2 = slotSymbols[Math.floor(Math.random() * slotSymbols.length)];
+    const reel3 = slotSymbols[Math.floor(Math.random() * slotSymbols.length)];
+    slotsVisual.textContent = reel1 + reel2 + reel3;
+    spins--;
+    if (spins <= 0) {
+      clearInterval(interval);
+      calculateSlotsWinnings(reel1, reel2, reel3, wager);
+      spinSlotsBtn.disabled = false;
+    }
+  }, 100);
+}
+
+function calculateSlotsWinnings(r1, r2, r3, wager) {
+  let payout = 0;
+  if (r1 === r2 && r2 === r3) {
+    payout = wager * 10;
+  } else if (r1 === r2 || r2 === r3 || r1 === r3) {
+    payout = wager * 2;
+  } else if (slotSymbols.includes(r1) && slotSymbols.includes(r2) && slotSymbols.includes(r3)) {
+    payout = wager * 0.5;
+  }
+  if (payout > 0) {
+    currentUserData.balance += payout;
+    saveUserData(currentUserData);
+    updateBalances(currentUserData);
+    slotsResult.textContent = `You won ${payout} LUTT! 🎉`;
+  } else {
+    slotsResult.textContent = `No win. Try again!`;
+  }
+}
+
+// --- BLACKJACK ---
+
+const blackjackWagerInput = document.getElementById("blackjackWager");
+const blackjackStartBtn = document.getElementById("blackjackStartBtn");
+const blackjackGameDiv = document.getElementById("blackjackGame");
+const playerHandSpan = document.getElementById("playerHand");
+const dealerHandSpan = document.getElementById("dealerHand");
+const playerScoreSpan = document.getElementById("playerScore");
+const dealerScoreSpan = document.getElementById("dealerScore");
+const hitBtn = document.getElementById("hitBtn");
+const standBtn = document.getElementById("standBtn");
+const doubleBtn = document.getElementById("doubleBtn");
+const blackjackMsg = document.getElementById("blackjackMsg");
+
+let blackjackDeck = [];
+let playerHand = [];
+let dealerHand = [];
+let blackjackWager = 0;
+let canDouble = true;
+
+function createBlackjackDeck() {
+  const suits = ["♠", "♥", "♦", "♣"];
+  const values = [
+    { name: "A", value: [1, 11] },
+    { name: "2", value: [2] },
+    { name: "3", value: [3] },
+    { name: "4", value: [4] },
+    { name: "5", value: [5] },
+    { name: "6", value: [6] },
+    { name: "7", value: [7] },
+    { name: "8", value: [8] },
+    { name: "9", value: [9] },
+    { name: "10", value: [10] },
+    { name: "J", value: [10] },
+    { name: "Q", value: [10] },
+    { name: "K", value: [10] }
+  ];
+
+  const deck = [];
+  for (const suit of suits) {
+    for (const val of values) {
+      deck.push({ suit, name: val.name, value: val.value });
+    }
+  }
+  return deck;
+}
+
+function shuffle(deck) {
+  for (let i = deck.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+}
+
+function handScore(hand) {
+  let scores = [0];
+  hand.forEach(card => {
+    let newScores = [];
+    card.value.forEach(val => {
+      scores.forEach(s => {
+        newScores.push(s + val);
+      });
+    });
+    scores = newScores;
+  });
+  let validScores = scores.filter(s => s <= 21);
+  if (validScores.length === 0) return Math.min(...scores);
+  return Math.max(...validScores);
+}
+
+function handToString(hand) {
+  return hand.map(c => `${c.name}${c.suit}`).join(" ");
+}
+
+function updateBlackjackUI() {
+  playerHandSpan.textContent = handToString(playerHand);
+  dealerHandSpan.textContent = handToString(dealerHand);
+  playerScoreSpan.textContent = handScore(playerHand);
+  dealerScoreSpan.textContent = handScore(dealerHand);
+}
+
+function endBlackjackGame(msg, payoutMultiplier = 0) {
+  blackjackMsg.textContent = msg;
+  hitBtn.disabled = true;
+  standBtn.disabled = true;
+  doubleBtn.disabled = true;
+  blackjackGameDiv.classList.remove("hidden");
+
+  if (payoutMultiplier > 0) {
+    let winnings = blackjackWager * payoutMultiplier;
+    currentUserData.balance += winnings;
+    saveUserData(currentUserData);
+    updateBalances(currentUserData);
+  }
+}
+
+function dealerPlay() {
+  while (handScore(dealerHand) < 17) {
+    dealerHand.push(blackjackDeck.pop());
+  }
+}
+
+blackjackStartBtn.addEventListener("click", () => {
+  if (!currentUserData) {
+    alert("Please log in to play!");
+    return;
+  }
+  let wager = parseInt(blackjackWagerInput.value);
+  if (!wager || wager < 1) {
+    alert("Enter a valid wager.");
+    return;
+  }
+  if (wager > currentUserData.balance) {
+    alert("Insufficient balance.");
+    return;
+  }
+  blackjackWager = wager;
+  currentUserData.balance -= wager;
+  saveUserData(currentUserData);
+  updateBalances(currentUserData);
+
+  blackjackDeck = createBlackjackDeck();
+  shuffle(blackjackDeck);
+  playerHand = [blackjackDeck.pop(), blackjackDeck.pop()];
+  dealerHand = [blackjackDeck.pop(), blackjackDeck.pop()];
+  canDouble = true;
+
+  updateBlackjackUI();
+
+  blackjackMsg.textContent = "";
+  hitBtn.disabled = false;
+  standBtn.disabled = false;
+  doubleBtn.disabled = false;
+  blackjackGameDiv.classList.remove("hidden");
+});
+
+hitBtn.addEventListener("click", () => {
+  playerHand.push(blackjackDeck.pop());
+  canDouble = false;
+  updateBlackjackUI();
+
+  const score = handScore(playerHand);
+  if (score > 21) {
+    endBlackjackGame("Bust! You lose.");
+  }
+});
+
+standBtn.addEventListener("click", () => {
+  dealerPlay();
+  updateBlackjackUI();
+
+  const playerScore = handScore(playerHand);
+  const dealerScore = handScore(dealerHand);
+
+  if (dealerScore > 21 || playerScore > dealerScore) {
+    endBlackjackGame("You win!", 2);
+  } else if (dealerScore === playerScore) {
+    currentUserData.balance += blackjackWager; // return wager on tie
+    saveUserData(currentUserData);
+    updateBalances(currentUserData);
+    endBlackjackGame("Push! Bet returned.");
+  } else {
+    endBlackjackGame("You lose.");
+  }
+});
+
+doubleBtn.addEventListener("click", () => {
+  if (!canDouble) return alert("You can only double on your first move!");
+  if (blackjackWager * 2 > currentUserData.balance + blackjackWager) return alert("Insufficient balance to double down.");
+
+  currentUserData.balance -= blackjackWager;
+  blackjackWager *= 2;
+  saveUserData(currentUserData);
+  updateBalances(currentUserData);
+
+  playerHand.push(blackjackDeck.pop());
+  updateBlackjackUI();
+
+  if (handScore(playerHand) > 21) {
+    endBlackjackGame("Bust after doubling down! You lose.");
+  } else {
+    dealerPlay();
+    updateBlackjackUI();
+    const playerScore = handScore(playerHand);
+    const dealerScore = handScore(dealerHand);
+    if (dealerScore > 21 || playerScore > dealerScore) {
+      endBlackjackGame("You win!", 2);
+    } else if (dealerScore === playerScore) {
+      currentUserData.balance += blackjackWager; // return wager on tie
+      saveUserData(currentUserData);
+      updateBalances(currentUserData);
+      endBlackjackGame("Push! Bet returned.");
+    } else {
+      endBlackjackGame("You lose.");
+    }
+  }
+});
+
+// --- HIGH-LOW ---
 
 const highlowWagerInput = document.getElementById("highlowWager");
 const startHighLowBtn = document.getElementById("startHighLowBtn");
+const cashoutHighLowBtn = document.getElementById("cashoutHighLowBtn");
 const currentCardDiv = document.getElementById("currentCard");
 const guessHigherBtn = document.getElementById("guessHigherBtn");
 const guessLowerBtn = document.getElementById("guessLowerBtn");
 const highlowMsg = document.getElementById("highlowMsg");
 const highlowStreakSpan = document.getElementById("highlowStreak");
+const highlowWinningsSpan = document.getElementById("highlowWinnings");
 const highlowGameDiv = document.getElementById("highlowGame");
 
 let highlowDeck = [];
 let currentHighLowCard = null;
 let highlowStreak = 0;
+let highlowWager = 0;
+let highlowCurrentWinnings = 0;
 
-function createDeck() {
+const cardMultipliers = {
+  14: 3, // Ace highest multiplier
+  13: 2.5,
+  12: 2,
+  11: 1.5,
+  10: 1.3,
+  9: 1.2,
+  8: 1.1,
+  7: 1,
+  6: 0.8,
+  5: 0.7,
+  4: 0.6,
+  3: 0.5,
+  2: 0.4
+};
+
+function createHighLowDeck() {
   const suits = ["♠", "♥", "♦", "♣"];
   const values = [
     { name: "A", value: 14 },
@@ -205,14 +506,14 @@ function createDeck() {
   return deck;
 }
 
-function shuffleDeck(deck) {
+function shuffleHighLowDeck(deck) {
   for (let i = deck.length -1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i+1));
     [deck[i], deck[j]] = [deck[j], deck[i]];
   }
 }
 
-function showCard(card) {
+function showHighLowCard(card) {
   if (!card) {
     currentCardDiv.textContent = "🂠";
     return;
@@ -221,211 +522,12 @@ function showCard(card) {
   currentCardDiv.innerHTML = `<span style="color:${suitColor}; font-size:5rem">${card.name}${card.suit}</span>`;
 }
 
-function resetHighLow() {
-  highlowDeck = createDeck();
-  shuffleDeck(highlowDeck);
-  currentHighLowCard = highlowDeck.pop();
-  showCard(currentHighLowCard);
-  highlowStreak = 0;
-  highlowStreakSpan.textContent = highlowStreak;
-  highlowMsg.textContent = "";
-  guessHigherBtn.disabled = false;
-  guessLowerBtn.disabled = false;
-  highlowGameDiv.classList.remove("hidden");
-}
-
-async function startHighLow() {
-  if (!currentUserData) {
-    alert("Please log in first!");
-    return;
-  }
-  const wager = parseInt(highlowWagerInput.value);
-  if (isNaN(wager) || wager < 1) {
-    alert("Please enter a valid wager (minimum 1).");
-    return;
-  }
-  if (wager > currentUserData.balance) {
-    alert("Insufficient balance for this wager.");
-    return;
-  }
-  currentUserData.balance -= wager;
-  await saveUserData(currentUserData);
-  updateBalances(currentUserData);
-  resetHighLow();
-}
-
-async function guessHighLow(guessHigher) {
-  if (highlowDeck.length === 0) {
-    highlowMsg.textContent = "No more cards. Game over.";
-    guessHigherBtn.disabled = true;
-    guessLowerBtn.disabled = true;
-    return;
-  }
-  const nextCard = highlowDeck.pop();
-  showCard(nextCard);
-  if ((guessHigher && nextCard.value > currentHighLowCard.value) ||
-      (!guessHigher && nextCard.value < currentHighLowCard.value)) {
-    // Correct guess
-    highlowStreak++;
-    highlowStreakSpan.textContent = highlowStreak;
-    // Reward: wager * streak (for example)
-    const reward = parseInt(highlowWagerInput.value) * highlowStreak;
-    currentUserData.balance += reward;
-    await saveUserData(currentUserData);
-    updateBalances(currentUserData);
-    highlowMsg.textContent = `Correct! You earned ${reward} LUTT.`;
-  } else {
-    // Wrong guess - end game
-    highlowMsg.textContent = "Wrong! Game over.";
-    guessHigherBtn.disabled = true;
-    guessLowerBtn.disabled = true;
-  }
-  currentHighLowCard = nextCard;
-}
-
-startHighLowBtn.addEventListener("click", startHighLow);
-guessHigherBtn.addEventListener("click", () => guessHighLow(true));
-guessLowerBtn.addEventListener("click", () => guessHighLow(false));
-
-/* ------------------------------
-      PLINKO GAME IMPLEMENTATION
--------------------------------- */
-
-const plinkoWagerInput = document.getElementById("plinkoWager");
-const plinkoDifficultySelect = document.getElementById("plinkoDifficulty");
-const plinkoStartBtn = document.getElementById("plinkoStartBtn");
-const plinkoBoard = document.getElementById("plinkoBoard");
-const plinkoResult = document.getElementById("plinkoResult");
-
-let plinkoBall = null;
-
-const plinkoConfig = {
-  easy: {
-    rows: 7,
-    cols: 8,
-    multipliers: [0, 0.5, 1, 2, 2, 1, 0.5, 0],
-  },
-  medium: {
-    rows: 9,
-    cols: 9,
-    multipliers: [0, 0.3, 1, 3, 5, 3, 1, 0.3, 0],
-  },
-  hard: {
-    rows: 11,
-    cols: 10,
-    multipliers: [0, 0.1, 0.5, 2, 5, 10, 5, 2, 0.5, 0.1],
-  },
-};
-
-function createPlinkoBoard(difficulty) {
-  plinkoBoard.innerHTML = "";
-  const config = plinkoConfig[difficulty];
-  const pegSpacingX = plinkoBoard.clientWidth / config.cols;
-  const pegSpacingY = plinkoBoard.clientHeight / config.rows;
-
-  // Create pegs
-  for (let row = 0; row < config.rows; row++) {
-    for (let col = 0; col < config.cols; col++) {
-      // Skip pegs on odd rows at end for staggered layout
-      if (row % 2 === 1 && col === config.cols - 1) continue;
-      const peg = document.createElement("div");
-      peg.className = "plinko-peg";
-      let x = col * pegSpacingX + (row % 2 === 1 ? pegSpacingX / 2 : 0);
-      let y = row * pegSpacingY;
-      peg.style.left = `${x}px`;
-      peg.style.top = `${y}px`;
-      plinkoBoard.appendChild(peg);
-    }
-  }
-
-  // Create slots
-  const slotCount = config.multipliers.length;
-  const slotWidth = plinkoBoard.clientWidth / slotCount;
-  for (let i = 0; i < slotCount; i++) {
-    const slot = document.createElement("div");
-    slot.className = "plinko-slot";
-    slot.style.left = `${i * slotWidth}px`;
-    slot.style.width = `${slotWidth}px`;
-    slot.textContent = `${config.multipliers[i]}x`;
-    plinkoBoard.appendChild(slot);
-  }
-}
-
-function createPlinkoBall() {
-  if (plinkoBall) plinkoBall.remove();
-  plinkoBall = document.createElement("div");
-  plinkoBall.className = "plinko-ball";
-  plinkoBoard.appendChild(plinkoBall);
-  plinkoBall.style.top = "10px";
-  plinkoBall.style.left = (plinkoBoard.clientWidth / 2 - 12) + "px";
-}
-
-function playPlinkoSound(type) {
-  if (!window.AudioContext) return;
-  const ctx = new AudioContext();
-  const o = ctx.createOscillator();
-  const g = ctx.createGain();
-  o.connect(g);
-  g.connect(ctx.destination);
-  if (type === "drop") {
-    o.frequency.value = 800;
-    g.gain.value = 0.1;
-  } else if (type === "bounce") {
-    o.frequency.value = 1200;
-    g.gain.value = 0.05;
-  }
-  o.start();
-  setTimeout(() => {
-    o.stop();
-    ctx.close();
-  }, 100);
-}
-
-async function dropBall() {
-  const difficulty = plinkoDifficultySelect.value;
-  const config = plinkoConfig[difficulty];
-  const rows = config.rows;
-  const cols = config.cols;
-  const pegSpacingX = plinkoBoard.clientWidth / cols;
-  const pegSpacingY = plinkoBoard.clientHeight / rows;
-
-  let x = plinkoBoard.clientWidth / 2 - 12;
-  let y = 10;
-  createPlinkoBall();
-  playPlinkoSound("drop");
-
-  let path = [];
-  for (let row = 0; row < rows; row++) {
-    const moveLeft = Math.random() < 0.5;
-    if (row % 2 === 1) {
-      x += moveLeft ? -pegSpacingX / 2 : pegSpacingX / 2;
-    }
-    y += pegSpacingY;
-    path.push({ x, y });
-  }
-
-  for (const pos of path) {
-    await new Promise(r => setTimeout(r, 200));
-    plinkoBall.style.left = pos.x + "px";
-    plinkoBall.style.top = pos.y + "px";
-    playPlinkoSound("bounce");
-  }
-
-  const slotWidth = plinkoBoard.clientWidth / config.multipliers.length;
-  const slotIndex = Math.min(
-    config.multipliers.length - 1,
-    Math.max(0, Math.floor((x + 12) / slotWidth))
-  );
-  const multiplier = config.multipliers[slotIndex];
-  return multiplier;
-}
-
-async function playPlinko() {
+function startHighLow() {
   if (!currentUserData) {
     alert("Please log in to play!");
     return;
   }
-  const wager = parseInt(plinkoWagerInput.value);
+  const wager = parseInt(highlowWagerInput.value);
   if (!wager || wager < 1) {
     alert("Enter a valid wager.");
     return;
@@ -434,56 +536,102 @@ async function playPlinko() {
     alert("Insufficient balance.");
     return;
   }
-
-  plinkoStartBtn.disabled = true;
-  plinkoResult.textContent = "";
+  highlowWager = wager;
   currentUserData.balance -= wager;
-  await saveUserData(currentUserData);
+  saveUserData(currentUserData);
   updateBalances(currentUserData);
 
-  createPlinkoBoard(plinkoDifficultySelect.value);
+  highlowDeck = createHighLowDeck();
+  shuffleHighLowDeck(highlowDeck);
+  currentHighLowCard = highlowDeck.pop();
+  highlowStreak = 0;
+  highlowCurrentWinnings = 0;
 
-  const multiplier = await dropBall();
+  showHighLowCard(currentHighLowCard);
+  highlowMsg.textContent = "Guess if next card is higher or lower!";
+  highlowStreakSpan.textContent = highlowStreak;
+  highlowWinningsSpan.textContent = highlowCurrentWinnings.toFixed(2);
 
-  const winnings = Math.floor(wager * multiplier);
-  if (winnings > 0) {
-    currentUserData.balance += winnings;
-    await saveUserData(currentUserData);
-    updateBalances(currentUserData);
-    plinkoResult.textContent = `You won ${winnings} LUTT! (x${multiplier}) 🎉`;
+  startHighLowBtn.classList.add("hidden");
+  cashoutHighLowBtn.classList.remove("hidden");
+  highlowGameDiv.classList.remove("hidden");
+}
+
+function guessHighLow(isHigher) {
+  if (highlowDeck.length === 0) {
+    highlowMsg.textContent = "Deck exhausted, cashing out!";
+    cashOutHighLow();
+    return;
+  }
+  const nextCard = highlowDeck.pop();
+  const won = (isHigher && nextCard.value > currentHighLowCard.value) || (!isHigher && nextCard.value < currentHighLowCard.value);
+  if (nextCard.value === currentHighLowCard.value) {
+    // Equal value treated as loss
+    highlowMsg.textContent = `Next card was ${nextCard.name}${nextCard.suit}. It's a tie, you lose!`;
+    endHighLow();
+    return;
+  }
+  if (won) {
+    highlowStreak++;
+    const multiplier = cardMultipliers[nextCard.value] || 1;
+    highlowCurrentWinnings += highlowWager * multiplier;
+    highlowMsg.textContent = `Next card was ${nextCard.name}${nextCard.suit}. You won! Multiplier: ${multiplier.toFixed(2)}x`;
+    currentHighLowCard = nextCard;
+    showHighLowCard(currentHighLowCard);
+    highlowStreakSpan.textContent = highlowStreak;
+    highlowWinningsSpan.textContent = highlowCurrentWinnings.toFixed(2);
   } else {
-    plinkoResult.textContent = `No winnings. Better luck next time!`;
+    highlowMsg.textContent = `Next card was ${nextCard.name}${nextCard.suit}. You lost!`;
+    endHighLow();
   }
-  plinkoStartBtn.disabled = false;
 }
 
-plinkoStartBtn.addEventListener("click", playPlinko);
-createPlinkoBoard(plinkoDifficultySelect.value);
-plinkoDifficultySelect.addEventListener("change", () => createPlinkoBoard(plinkoDifficultySelect.value));
-
-/* ------------------------------
-          LEADERBOARD
---------------------------------*/
-
-const leaderboardList = document.getElementById("leaderboardList");
-
-async function updateLeaderboard() {
-  const snapshot = await db.collection("users").orderBy("balance", "desc").limit(10).get();
-  leaderboardList.innerHTML = "";
-  snapshot.forEach(doc => {
-    const user = doc.data();
-    const li = document.createElement("li");
-    li.textContent = `${user.username || "Anonymous"}: ${user.balance} LUTT`;
-    leaderboardList.appendChild(li);
-  });
+function cashOutHighLow() {
+  currentUserData.balance += highlowCurrentWinnings;
+  saveUserData(currentUserData);
+  updateBalances(currentUserData);
+  highlowMsg.textContent = `You cashed out with ${highlowCurrentWinnings.toFixed(2)} LUTT!`;
+  endHighLow();
 }
 
-// Update leaderboard every 20 seconds only if app is visible
-setInterval(() => {
-  if (!appSection.classList.contains("hidden")) {
-    updateLeaderboard();
-  }
-}, 20000);
+function endHighLow() {
+  startHighLowBtn.classList.remove("hidden");
+  cashoutHighLowBtn.classList.add("hidden");
+  highlowGameDiv.classList.add("hidden");
+  highlowStreak = 0;
+  highlowCurrentWinnings = 0;
+  showHighLowCard(null);
+}
 
-updateLeaderboard();
+// High-Low listeners
+startHighLowBtn.addEventListener("click", startHighLow);
+cashoutHighLowBtn.addEventListener("click", cashOutHighLow);
+guessHigherBtn.addEventListener("click", () => guessHighLow(true));
+guessLowerBtn.addEventListener("click", () => guessHighLow(false));
 
+// --- PLINKO ---
+
+const plinkoWagerInput = document.getElementById("plinkoWager");
+const plinkoDifficultySelect = document.getElementById("plinkoDifficulty");
+const plinkoStartBtn = document.getElementById("plinkoStartBtn");
+const plinkoBoard = document.getElementById("plinkoBoard");
+const plinkoResult = document.getElementById("plinkoResult");
+
+const plinkoRows = 10;
+const plinkoCols = 11;
+
+plinkoStartBtn.addEventListener("click", startPlinko);
+
+function generatePlinkoBoard() {
+  plinkoBoard.innerHTML = "";
+  const pegSpacingX = plinkoBoard.clientWidth / plinkoCols;
+  const pegSpacingY = plinkoBoard.clientHeight / plinkoRows;
+
+  for (let r = 0; r < plinkoRows; r++) {
+    for (let c = 0; c < plinkoCols; c++) {
+      if (r === plinkoRows - 1) {
+        // Create slots
+        const slot = document.createElement("div");
+        slot.classList.add("plinko-slot");
+        slot.style.left = `${(c * pegSpacingX)}px`;
+       
