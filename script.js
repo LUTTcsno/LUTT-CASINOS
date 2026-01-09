@@ -1,245 +1,239 @@
-// Cached DOM elements
-const loginDiv = document.getElementById("login");
-const userInfoDiv = document.getElementById("userInfo");
-const nav = document.getElementById("nav");
-const gameTabs = document.querySelectorAll(".gameTab");
-const userEmailSpan = document.getElementById("userEmail");
-const balanceSpan = document.getElementById("balance");
-const streakSpan = document.getElementById("streak");
+// Wait for DOM to load before attaching listeners
+document.addEventListener("DOMContentLoaded", () => {
 
-// Buttons and interactive elements
-const signUpBtn = document.getElementById("signUpBtn");
-const loginBtn = document.getElementById("loginBtn");
-const logoutBtn = document.getElementById("logoutBtn");
-const dailyBonusBtn = document.getElementById("dailyBonusBtn");
-const caseBtn = document.getElementById("caseBtn");
-const battleBtn = document.getElementById("battleBtn");
-const battleBetInput = document.getElementById("battleBet");
+  // Firebase references
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
-// Game result areas
-const dailyMsg = document.getElementById("dailyMsg");
-const caseResult = document.getElementById("caseResult");
-const battleResult = document.getElementById("battleResult");
-const battleAnimation = document.getElementById("battleAnimation");
+  // DOM Elements
+  const loginDiv = document.getElementById("login");
+  const userInfoDiv = document.getElementById("userInfo");
+  const nav = document.getElementById("nav");
+  const gameTabs = document.querySelectorAll(".gameTab");
+  const userEmailSpan = document.getElementById("userEmail");
+  const balanceSpan = document.getElementById("balance");
+  const streakSpan = document.getElementById("streak");
 
-const blackjackPlayBtn = document.getElementById("blackjackPlayBtn");
-const blackjackResult = document.getElementById("blackjackResult");
-const blackjackCardsDiv = document.getElementById("blackjackCards");
+  // Buttons and UI
+  const signUpBtn = document.getElementById("signUpBtn");
+  const loginBtn = document.getElementById("loginBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const dailyBonusBtn = document.getElementById("dailyBonusBtn");
+  const caseBtn = document.getElementById("caseBtn");
+  const battleBtn = document.getElementById("battleBtn");
+  const battleBetInput = document.getElementById("battleBet");
 
-const rouletteSpinBtn = document.getElementById("rouletteSpinBtn");
-const rouletteResult = document.getElementById("rouletteResult");
-const rouletteWheelDiv = document.getElementById("rouletteWheel");
+  const dailyMsg = document.getElementById("dailyMsg");
+  const caseResult = document.getElementById("caseResult");
+  const battleResult = document.getElementById("battleResult");
+  const battleAnimation = document.getElementById("battleAnimation");
 
-const pokerPlayBtn = document.getElementById("pokerPlayBtn");
-const pokerResult = document.getElementById("pokerResult");
+  const blackjackPlayBtn = document.getElementById("blackjackPlayBtn");
+  const blackjackResult = document.getElementById("blackjackResult");
+  const blackjackCardsDiv = document.getElementById("blackjackCards");
 
-const baccaratPlayBtn = document.getElementById("baccaratPlayBtn");
-const baccaratResult = document.getElementById("baccaratResult");
+  const rouletteSpinBtn = document.getElementById("rouletteSpinBtn");
+  const rouletteResult = document.getElementById("rouletteResult");
+  const rouletteWheelDiv = document.getElementById("rouletteWheel");
 
-const leaderboardList = document.getElementById("leaderboardList");
+  const pokerPlayBtn = document.getElementById("pokerPlayBtn");
+  const pokerResult = document.getElementById("pokerResult");
 
-let currentUser = null;
-let currentUserData = null;
+  const baccaratPlayBtn = document.getElementById("baccaratPlayBtn");
+  const baccaratResult = document.getElementById("baccaratResult");
 
-// Show/hide tabs
-function showGameTab(tabName) {
-  gameTabs.forEach(tab => {
-    if (tab.id === tabName) {
-      tab.classList.remove("hidden");
-    } else {
-      tab.classList.add("hidden");
+  const leaderboardList = document.getElementById("leaderboardList");
+
+  let currentUser = null;
+  let currentUserData = null;
+
+  // Utility to show/hide game tabs
+  function showGameTab(tabName) {
+    gameTabs.forEach(tab => {
+      if (tab.id === tabName) {
+        tab.classList.remove("hidden");
+      } else {
+        tab.classList.add("hidden");
+      }
+    });
+    clearGameMessages();
+  }
+
+  // Clear all game messages
+  function clearGameMessages() {
+    dailyMsg.innerText = "";
+    caseResult.innerText = "";
+    battleResult.innerText = "";
+    blackjackResult.innerText = "";
+    rouletteResult.innerText = "";
+    pokerResult.innerText = "";
+    baccaratResult.innerText = "";
+  }
+
+  // Show login screen
+  function showLogin() {
+    loginDiv.classList.remove("hidden");
+    userInfoDiv.classList.add("hidden");
+    nav.classList.add("hidden");
+    showGameTab(null);
+  }
+
+  // Show main game UI
+  function showGame(data) {
+    loginDiv.classList.add("hidden");
+    userInfoDiv.classList.remove("hidden");
+    nav.classList.remove("hidden");
+    userEmailSpan.innerText = currentUser.email;
+    balanceSpan.innerText = data.balance;
+    streakSpan.innerText = data.streak;
+    currentUserData = data;
+    showGameTab("dailyBonus");
+  }
+
+  // Initialize user data if new
+  async function initUserData() {
+    const uid = currentUser.uid;
+    const userDoc = db.collection("users").doc(uid);
+    const doc = await userDoc.get();
+    if (!doc.exists) {
+      await userDoc.set({
+        balance: 1000,
+        streak: 0,
+        lastLogin: null,
+        lastCase: null
+      });
     }
-  });
-  clearGameMessages();
-}
-
-// Clear messages
-function clearGameMessages() {
-  dailyMsg.innerText = "";
-  caseResult.innerText = "";
-  battleResult.innerText = "";
-  blackjackResult.innerText = "";
-  rouletteResult.innerText = "";
-  pokerResult.innerText = "";
-  baccaratResult.innerText = "";
-}
-
-// Show login screen
-function showLogin() {
-  loginDiv.classList.remove("hidden");
-  userInfoDiv.classList.add("hidden");
-  nav.classList.add("hidden");
-  showGameTab(null);
-}
-
-// Show game screen
-function showGame(data) {
-  loginDiv.classList.add("hidden");
-  userInfoDiv.classList.remove("hidden");
-  nav.classList.remove("hidden");
-  userEmailSpan.innerText = currentUser.email;
-  balanceSpan.innerText = data.balance;
-  streakSpan.innerText = data.streak;
-  currentUserData = data;
-  showGameTab("dailyBonus");
-}
-
-// --- Firebase Auth handlers ---
-signUpBtn.addEventListener("click", handleSignUp);
-loginBtn.addEventListener("click", handleLogin);
-logoutBtn.addEventListener("click", logout);
-dailyBonusBtn.addEventListener("click", claimDaily);
-caseBtn.addEventListener("click", openCase);
-battleBtn.addEventListener("click", caseBattle);
-
-blackjackPlayBtn.addEventListener("click", playBlackjack);
-rouletteSpinBtn.addEventListener("click", playRoulette);
-pokerPlayBtn.addEventListener("click", playPoker);
-baccaratPlayBtn.addEventListener("click", playBaccarat);
-
-document.querySelectorAll("nav button").forEach(btn => {
-  btn.addEventListener("click", () => {
-    showGameTab(btn.dataset.tab);
-    if(btn.dataset.tab === "leaderboard") updateLeaderboard();
-  });
-});
-
-// Sign Up function
-async function handleSignUp() {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
-
-  if (!email || !password) {
-    alert("Please enter email and password");
-    return;
   }
 
-  try {
-    await auth.createUserWithEmailAndPassword(email, password);
-    await initUserData();
-  } catch (e) {
-    alert("Sign Up Error: " + e.message);
-  }
-}
-
-// Login function
-async function handleLogin() {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
-
-  if (!email || !password) {
-    alert("Please enter email and password");
-    return;
+  // Load user data from Firestore
+  async function loadUserData() {
+    const uid = currentUser.uid;
+    const userDoc = db.collection("users").doc(uid);
+    const doc = await userDoc.get();
+    if (doc.exists) {
+      return doc.data();
+    } else {
+      await initUserData();
+      return loadUserData();
+    }
   }
 
-  try {
-    await auth.signInWithEmailAndPassword(email, password);
-  } catch (e) {
-    alert("Login Error: " + e.message);
+  // Save user data to Firestore
+  async function saveUserData(data) {
+    const uid = currentUser.uid;
+    const userDoc = db.collection("users").doc(uid);
+    await userDoc.set(data);
   }
-}
 
-// Logout function
-function logout() {
-  auth.signOut();
-}
+  // Update leaderboard UI with top 10 users by balance
+  async function updateLeaderboard() {
+    leaderboardList.innerHTML = "Loading...";
+    const usersSnapshot = await db.collection("users")
+      .orderBy("balance", "desc")
+      .limit(10)
+      .get();
 
-// Initialize user data if new
-async function initUserData() {
-  const uid = auth.currentUser.uid;
-  const userDoc = db.collection("users").doc(uid);
-  const doc = await userDoc.get();
-
-  if (!doc.exists) {
-    await userDoc.set({
-      balance: 1000,
-      streak: 0,
-      lastLogin: null,
-      lastCase: null
+    leaderboardList.innerHTML = "";
+    usersSnapshot.forEach(doc => {
+      const user = doc.data();
+      const li = document.createElement("li");
+      li.textContent = `${user.email ? user.email : "Anonymous"} - ${user.balance} LUTT`;
+      leaderboardList.appendChild(li);
     });
   }
-}
 
-// Load user data
-async function loadUserData() {
-  const uid = auth.currentUser.uid;
-  const userDoc = db.collection("users").doc(uid);
-  const doc = await userDoc.get();
-  if (doc.exists) {
-    return doc.data();
-  } else {
-    await initUserData();
-    return loadUserData();
-  }
-}
+  // --- Auth Event Listeners ---
 
-// Save user data
-async function saveUserData(data) {
-  const uid = auth.currentUser.uid;
-  const userDoc = db.collection("users").doc(uid);
-  await userDoc.set(data);
-}
+  signUpBtn.addEventListener("click", async () => {
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
 
-// Listen for auth state changes
-auth.onAuthStateChanged(async (user) => {
-  if (user) {
-    currentUser = user;
-    const data = await loadUserData();
-    showGame(data);
-    updateLeaderboard();
-  } else {
+    if (!email || !password) {
+      alert("Please enter email and password");
+      return;
+    }
+
+    try {
+      await auth.createUserWithEmailAndPassword(email, password);
+      currentUser = auth.currentUser;
+      await initUserData();
+      const data = await loadUserData();
+      showGame(data);
+      updateLeaderboard();
+    } catch (e) {
+      alert("Sign Up Error: " + e.message);
+    }
+  });
+
+  loginBtn.addEventListener("click", async () => {
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    if (!email || !password) {
+      alert("Please enter email and password");
+      return;
+    }
+
+    try {
+      await auth.signInWithEmailAndPassword(email, password);
+      currentUser = auth.currentUser;
+      const data = await loadUserData();
+      showGame(data);
+      updateLeaderboard();
+    } catch (e) {
+      alert("Login Error: " + e.message);
+    }
+  });
+
+  logoutBtn.addEventListener("click", async () => {
+    await auth.signOut();
     currentUser = null;
     showLogin();
-  }
-});
+  });
 
-// --- Daily Bonus ---
-async function claimDaily() {
-  if (!currentUser) return alert("Please log in");
+  // Firebase Auth state observer (handle page refresh)
+  auth.onAuthStateChanged(async (user) => {
+    if (user) {
+      currentUser = user;
+      const data = await loadUserData();
+      showGame(data);
+      updateLeaderboard();
+    } else {
+      currentUser = null;
+      showLogin();
+    }
+  });
 
-  const userDoc = db.collection("users").doc(currentUser.uid);
-  const doc = await userDoc.get();
-  let data = doc.data();
+  // --- Daily Bonus ---
 
-  const today = new Date().toDateString();
+  dailyBonusBtn.addEventListener("click", async () => {
+    if (!currentUser) return alert("Please log in");
 
-  if (data.lastLogin === today) {
-    return msg("dailyMsg", "Already claimed today!");
-  }
+    const userDoc = db.collection("users").doc(currentUser.uid);
+    const doc = await userDoc.get();
+    let data = doc.data();
 
-  let yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
+    const today = new Date().toDateString();
 
-  if (data.lastLogin === yesterday.toDateString()) {
-    data.streak++;
-  } else {
-    data.streak = 1;
-  }
+    if (data.lastLogin === today) {
+      dailyMsg.innerText = "Already claimed today!";
+      return;
+    }
 
-  const reward = 200 + data.streak * 50;
-  data.balance += reward;
-  data.lastLogin = today;
+    let yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
 
-  await saveUserData(data);
-  showGame(data);
-  msg("dailyMsg", `+${reward} LUTT (Streak x${data.streak})`);
-}
+    if (data.lastLogin === yesterday.toDateString()) {
+      data.streak++;
+    } else {
+      data.streak = 1;
+    }
 
-// --- Case Open ---
-async function openCase() {
-  if (!currentUser) return alert("Please log in");
+    const reward = 200 + data.streak * 50;
+    data.balance += reward;
+    data.lastLogin = today;
 
-  const userDoc = db.collection("users").doc(currentUser.uid);
-  const doc = await userDoc.get();
-  let data = doc.data();
-
-  const today = new Date().toDateString();
-
-  if (data.lastCase === today) {
-    return msg("caseResult", "You already opened your case today!");
-  }
-
-  const anim = document.getElementById("caseAnimation");
-  anim.classList.remove("hidden");
-
-  setTimeout(async () =>
+    await saveUserData(data);
+    balanceSpan.innerText = data.balance;
+    streakSpan.innerText = data.streak;
+    dailyMsg.innerText = `+${reward} LUTT (Streak x${data.st
