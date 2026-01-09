@@ -21,8 +21,6 @@
       measurementId: "G-TXJY4VLCHV"
     };
     firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
   </script>
 </head>
 <body>
@@ -117,6 +115,8 @@
   </section>
 </main>
 
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="script.js"></script>
 </body>
 </html>
