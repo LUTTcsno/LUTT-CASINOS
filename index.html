@@ -124,6 +124,37 @@
         <h2>Leaderboard - Top 10</h2>
         <ul id="leaderboardList"></ul>
       </section>
+
+          <!-- Add below your existing tabs/buttons -->
+      <button class="tab-btn" data-tab="daily-leaderboard">Daily Leaderboard</button>
+      <button class="tab-btn" data-tab="chat">Global Chat</button>
+      
+      <!-- Add new tab contents below existing leaderboard and game containers -->
+      
+      <!-- Daily Leaderboard tab content -->
+      <div id="daily-leaderboard" class="tab-content hidden">
+        <h2>Daily Leaderboard</h2>
+        <ul id="daily-leaderboard-list"></ul>
+      </div>
+      
+      <!-- Global Chat tab content -->
+      <div id="chat" class="tab-content hidden">
+        <h2>Global Chat</h2>
+        <div id="chat-messages" class="chat-messages"></div>
+        <input type="text" id="chat-input" placeholder="Type a message..." autocomplete="off" />
+        <button id="chat-send-btn">Send</button>
+      </div>
+      
+      <!-- Mines controls cashout button -->
+      <div id="mines-controls">
+        <button id="mines-cashout-btn" disabled>Cash Out</button>
+      </div>
+      
+      <!-- Free Box Timer & Claim -->
+      <div id="free-box-container">
+        <button id="free-box-btn" disabled>Claim Free LUTT Box</button>
+        <div id="free-box-timer">Next free box in: 30:00</div>
+      </div>
     </main>
   </section>
 
