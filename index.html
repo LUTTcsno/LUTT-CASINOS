@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>LUTT Casino</title>
+  <title>LUTT Casino 🎲</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -12,15 +12,17 @@
   </header>
 
   <!-- Login Section -->
-  <section id="loginSection">
+  <section id="loginSection" class="centered-section">
     <h2>Login or Sign Up</h2>
-    <input id="emailInput" type="email" placeholder="Email" />
-    <input id="passwordInput" type="password" placeholder="Password" />
-    <input id="usernameInput" type="text" placeholder="Choose Username" />
-    <button id="signupBtn">Sign Up</button>
-    <button id="loginBtn">Log In</button>
-    <button id="logoutBtn" class="hidden">Log Out</button>
-    <p id="authMsg"></p>
+    <input id="emailInput" type="email" placeholder="Email" autocomplete="username" />
+    <input id="passwordInput" type="password" placeholder="Password" autocomplete="current-password" />
+    <input id="usernameInput" type="text" placeholder="Choose Username (min 3 chars)" />
+    <div class="btn-group">
+      <button id="signupBtn" class="btn primary">Sign Up</button>
+      <button id="loginBtn" class="btn secondary">Log In</button>
+    </div>
+    <button id="logoutBtn" class="btn secondary hidden">Log Out</button>
+    <p id="authMsg" class="auth-message"></p>
   </section>
 
   <!-- Main App Section -->
@@ -43,7 +45,8 @@
 
     <!-- Blackjack Section -->
     <section id="blackjack" class="gameTab hidden">
-      <!-- Your existing Blackjack UI & code goes here -->
+      <h3>Blackjack (coming soon!)</h3>
+      <p>Feature under construction.</p>
     </section>
 
     <!-- High-Low Section -->
@@ -55,7 +58,7 @@
       <button id="startHighLowBtn" class="btn primary">Start Game</button>
 
       <div id="highlowGame" class="hidden">
-        <div id="currentCard" class="cardVisual" style="font-size: 80px; margin: 20px auto;">🂠</div>
+        <div id="currentCard" class="cardVisual">🂠</div>
         <div class="highlow-buttons">
           <button id="guessHigherBtn" class="btn secondary">Higher</button>
           <button id="guessLowerBtn" class="btn secondary">Lower</button>
@@ -85,7 +88,8 @@
 
     <!-- Case Battle Section -->
     <section id="caseBattle" class="gameTab hidden">
-      <!-- Your existing Case Battle UI & code -->
+      <h3>Case Battle PvP (coming soon!)</h3>
+      <p>Feature under construction.</p>
     </section>
 
     <!-- Leaderboard Section -->
@@ -95,10 +99,12 @@
     </section>
   </section>
 
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
+  <!-- Main Script -->
   <script src="script.js"></script>
 </body>
 </html>
