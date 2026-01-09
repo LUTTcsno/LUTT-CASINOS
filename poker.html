@@ -12,29 +12,42 @@
 </head>
 
 <body>
-  <header>
-    <h1>♠ LUTT Live Poker ♠</h1>
-    <button onclick="window.location.href='index.html'">← Back</button>
-  </header>
 
-  <div id="poker-table">
-    <div id="community-cards"></div>
+<header>
+  <h1>♠ LUTT Live Poker ♠</h1>
+  <button onclick="window.location.href='index.html'">← Back to Casino</button>
+</header>
 
-    <div id="players"></div>
+<!-- LOBBY -->
+<div id="lobby">
+  <h2>Poker Rooms</h2>
 
-    <div id="pot-display">Pot: 0 LUTT</div>
+  <input id="room-name" placeholder="Room name" />
+  <button id="create-room">Create Room</button>
 
-    <div id="controls">
-      <input type="number" id="bet-amount" placeholder="Bet amount" min="1" />
-      <button id="check-btn">Check</button>
-      <button id="call-btn">Call</button>
-      <button id="raise-btn">Raise</button>
-      <button id="fold-btn">Fold</button>
-    </div>
+  <div id="room-list"></div>
+</div>
 
-    <div id="poker-message"></div>
+<!-- TABLE -->
+<div id="table" class="hidden">
+  <h2 id="table-name"></h2>
+
+  <div id="community-cards"></div>
+  <div id="pot">Pot: 0 LUTT</div>
+
+  <div id="players"></div>
+
+  <div id="controls">
+    <input type="number" id="bet-amount" min="1" placeholder="Bet" />
+    <button id="check">Check</button>
+    <button id="call">Call</button>
+    <button id="raise">Raise</button>
+    <button id="fold">Fold</button>
   </div>
 
-  <script src="poker.js"></script>
+  <div id="message"></div>
+</div>
+
+<script src="poker.js"></script>
 </body>
 </html>
