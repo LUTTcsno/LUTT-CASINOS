@@ -3,89 +3,62 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>LUTT Casino - Colorful & Animated!</title>
+  <title>LUTT Casino</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
-  <div id="loginScreen" class="center-screen">
-    <h1>LUTT Casino</h1>
+  <div id="loginScreen">
+    <h1>Login or Sign Up</h1>
     <input id="email" type="email" placeholder="Email" />
     <input id="password" type="password" placeholder="Password" />
     <input id="username" type="text" placeholder="Username (for leaderboard)" />
-    <button id="signUpBtn" class="btn primary">Sign Up</button>
-    <button id="loginBtn" class="btn secondary">Log In</button>
+    <button id="signUpBtn">Sign Up</button>
+    <button id="loginBtn">Log In</button>
   </div>
 
   <div id="gameScreen" class="hidden">
     <header>
-      <h2>Welcome, <span id="displayUsername"></span>!</h2>
-      <button id="logoutBtn" class="btn danger">Log Out</button>
-      <div class="balance-display">Balance: <span id="balance">0</span> LUTT</div>
+      <span>Welcome, <span id="displayUsername"></span></span>
+      <button id="logoutBtn">Log Out</button>
     </header>
 
-    <nav class="nav-bar">
-      <button data-tab="dashboard" class="nav-btn active">Dashboard</button>
-      <button data-tab="blackjack" class="nav-btn">Blackjack</button>
-      <button data-tab="slots" class="nav-btn">Slots 🎰</button>
-      <button data-tab="caseBattle" class="nav-btn">Case Battle PvP</button>
-      <button data-tab="leaderboard" class="nav-btn">Leaderboard</button>
+    <nav>
+      <button data-tab="dashboard">Dashboard</button>
+      <button data-tab="blackjack">Blackjack</button>
+      <button data-tab="caseBattle">Case Battle PvP</button>
+      <button data-tab="leaderboard">Leaderboard</button>
     </nav>
 
     <section id="dashboard" class="gameTab">
-      <h3>Daily Login Bonus</h3>
-      <p>Streak: <span id="streak">0</span> days</p>
-      <button id="dailyBonusBtn" class="btn primary">Claim Daily Bonus</button>
-      <p id="dailyMsg" class="bonus-msg"></p>
+      <h2>Dashboard</h2>
+      <p>Balance: <span id="balance">0</span> LUTT</p>
+      <p>Daily Login Streak: <span id="streak">0</span></p>
+      <button id="dailyBonusBtn">Claim Daily Bonus</button>
+      <p id="dailyMsg"></p>
     </section>
 
     <section id="blackjack" class="gameTab hidden">
-      <h3>Blackjack</h3>
+      <h2>Blackjack</h2>
+      <p>Balance: <span id="balanceBlackjack">0</span> LUTT</p>
       <label>Wager:
         <input id="blackjackWager" type="number" min="1" placeholder="Enter wager" />
       </label>
-      <button id="blackjackPlayBtn" class="btn primary">Start Blackjack</button>
-
-      <div class="hands-container">
-        <div>
-          <h4>Dealer's Hand</h4>
-          <div id="dealerHand" class="hand"></div>
-        </div>
-        <div>
-          <h4>Your Hand</h4>
-          <div id="playerHand" class="hand"></div>
-        </div>
-      </div>
-
-      <div class="blackjack-controls">
-        <button id="hitBtn" disabled class="btn secondary">Hit</button>
-        <button id="standBtn" disabled class="btn secondary">Stand</button>
-        <button id="doubleBtn" disabled class="btn secondary">Double</button>
-      </div>
-
-      <p id="blackjackResult" class="result-msg"></p>
-    </section>
-
-    <section id="slots" class="gameTab hidden">
-      <h3>Slots 🎰</h3>
-      <label>Bet amount:
-        <input id="slotsWager" type="number" min="1" value="10" />
-      </label>
-      <button id="slotsSpinBtn" class="btn primary">Spin</button>
-
-      <div id="slotsReels" class="slots-reels">
-        <div class="reel" id="reel1"></div>
-        <div class="reel" id="reel2"></div>
-        <div class="reel" id="reel3"></div>
-      </div>
-
-      <p id="slotsResult" class="result-msg"></p>
+      <button id="blackjackPlayBtn">Start Blackjack</button>
+      <div id="dealerHand" class="hand"></div>
+      <div id="playerHand" class="hand"></div>
+      <p id="blackjackResult"></p>
+      <button id="hitBtn" disabled>Hit</button>
+      <button id="standBtn" disabled>Stand</button>
+      <button id="doubleBtn" disabled>Double</button>
     </section>
 
     <section id="caseBattle" class="gameTab hidden">
-      <h3>Case Battle PvP</h3>
+      <h2>Case Battle PvP</h2>
+      <p>Balance: <span id="balanceCaseBattle">0</span> LUTT</p>
+
       <label>
         Wager (LUTT):
         <input id="battleWager" type="number" min="1" placeholder="Enter wager" />
@@ -105,11 +78,11 @@
         </select>
       </label>
 
-      <button id="createBattleBtn" class="btn primary">Create Battle</button>
-      <button id="joinBattleBtn" disabled class="btn secondary">Join Selected Battle</button>
+      <button id="createBattleBtn">Create Battle</button>
+      <button id="joinBattleBtn" disabled>Join Selected Battle</button>
 
-      <h4>Active Battles:</h4>
-      <ul id="activeBattlesList" class="battles-list"></ul>
+      <h3>Active Battles:</h3>
+      <ul id="activeBattlesList"></ul>
 
       <div id="battleSpinnerContainer" class="battle-spinner-container hidden">
         <div class="spinner-container" id="playerSpinner">
@@ -121,12 +94,12 @@
           <div class="spinner-label">Opponent</div>
         </div>
       </div>
-      <p id="battleResult" class="result-msg"></p>
+      <p id="battleResult"></p>
     </section>
 
     <section id="leaderboard" class="gameTab hidden">
-      <h3>Leaderboard</h3>
-      <ul id="leaderboardList" class="leaderboard-list"></ul>
+      <h2>Leaderboard</h2>
+      <ul id="leaderboardList"></ul>
     </section>
   </div>
 
