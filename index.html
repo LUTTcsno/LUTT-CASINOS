@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>LUTT Casino</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>🎮 LUTT Casino</h1>
+<p class="disclaimer">Play-money only. LUTT has no real value.</p>
+
+<div id="login" class="card">
+  <input id="username" placeholder="Username">
+  <button onclick="login()">Login</button>
+</div>
+
+<div id="game" class="hidden">
+  <h2>Balance: <span id="balance"></span> LUTT</h2>
+
+  <div class="card">
+    <h3>🪙 Coin Flip</h3>
+    <input id="betFlip" type="number" placeholder="Bet">
+    <button onclick="coinFlip()">Flip</button>
+    <p id="flipResult"></p>
+  </div>
+
+  <div class="card">
+    <h3>🎲 Dice Roll</h3>
+    <input id="betDice" type="number" placeholder="Bet">
+    <button onclick="dice()">Roll Dice</button>
+    <p id="diceResult"></p>
+  </div>
+
+  <div class="card">
+    <h3>🎡 Roulette (Pick 0–9)</h3>
+    <input id="rouletteNum" type="number" min="0" max="9" placeholder="Number">
+    <input id="betRoulette" type="number" placeholder="Bet">
+    <button onclick="roulette()">Spin</button>
+    <p id="rouletteResult"></p>
+  </div>
+
+  <div class="card">
+    <h3>🃏 Blackjack</h3>
+    <input id="betBJ" type="number" placeholder="Bet">
+    <button onclick="blackjack()">Play</button>
+    <p id="bjResult"></p>
+  </div>
+
+  <div class="card">
+    <h3>🏆 Leaderboard</h3>
+    <ul id="leaderboard"></ul>
+  </div>
+
+  <button onclick="logout()">Logout</button>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
