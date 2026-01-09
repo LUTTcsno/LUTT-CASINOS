@@ -1,179 +1,193 @@
-let players = JSON.parse(localStorage.getItem("players")) || {};
-let user = null;
-const today = new Date().toDateString();
+body {
+  background: #121212;
+  color: #e0e0e0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
 
-function login() {
-  const name = document.getElementById("username").value.trim();
-  if (!name) return alert("Enter username");
+header {
+  background: #1f1f1f;
+  padding: 15px;
+  position: sticky;
+  top: 0;
+  color: #00ff99;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  z-index: 10;
+}
 
-  if (!players[name]) {
-    players[name] = {
-      balance: 1000,
-      lastLogin: "",
-      streak: 0,
-      lastCase: "",
-    };
+#userInfo button {
+  background: #00bb77;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-weight: bold;
+  border-radius: 4px;
+  transition: background 0.3s;
+}
+
+#userInfo button:hover {
+  background: #009955;
+}
+
+.card {
+  background: #222;
+  padding: 15px;
+  margin: 20px auto;
+  max-width: 400px;
+  border-radius: 10px;
+}
+
+input, button {
+  margin: 8px 5px;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 6px;
+  border: none;
+  outline: none;
+}
+
+input {
+  width: 70%;
+}
+
+button {
+  background: #00ff99;
+  color: #121212;
+  cursor: pointer;
+  font-weight: bold;
+  transition: transform 0.2s ease;
+}
+
+button:hover {
+  transform: scale(1.05);
+}
+
+nav {
+  margin: 10px 0;
+  background: #181818;
+  padding: 10px 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+nav button {
+  background: #00aa66;
+  color: #eee;
+  margin: 0 5px;
+  padding: 8px 14px;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+nav button:hover {
+  background: #007744;
+}
+
+.gameTab {
+  margin: 20px auto;
+  max-width: 600px;
+  background: #222;
+  padding: 15px;
+  border-radius: 10px;
+  min-height: 220px;
+  min-width: 320px;
+  box-shadow: 0 0 15px #00ff99aa;
+}
+
+.hidden {
+  display: none;
+}
+
+.case-animation {
+  margin: 15px auto;
+  width: 220px;
+  height: 110px;
+  background: linear-gradient(90deg, #00ff99 20%, #007f55 50%, #00ff99 80%);
+  border-radius: 12px;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -220px 0;
   }
-  user = name;
-  save();
-  showGame();
-}
-
-function logout() {
-  user = null;
-  document.getElementById("game").classList.add("hidden");
-  document.getElementById("login").classList.remove("hidden");
-}
-
-function showGame() {
-  document.getElementById("login").classList.add("hidden");
-  document.getElementById("game").classList.remove("hidden");
-  updateUI();
-}
-
-function updateUI() {
-  const p = players[user];
-  document.getElementById("balance").innerText = p.balance;
-  document.getElementById("streak").innerText = p.streak;
-  updateLeaderboard();
-  enableButtons();
-}
-
-function save() {
-  localStorage.setItem("players", JSON.stringify(players));
-}
-
-/* Enable or disable buttons based on daily limits */
-function enableButtons() {
-  const p = players[user];
-  const todayStr = new Date().toDateString();
-
-  document.getElementById("dailyBonusBtn").disabled = (p.lastLogin === todayStr);
-  document.getElementById("caseBtn").disabled = (p.lastCase === todayStr);
-}
-
-/* 🎁 DAILY LOGIN */
-function claimDaily() {
-  const p = players[user];
-  const todayStr = new Date().toDateString();
-
-  if (p.lastLogin === todayStr) {
-    return msg("dailyMsg", "You already claimed today!");
+  100% {
+    background-position: 220px 0;
   }
-
-  // Calculate streak (if yesterday logged in, +1 streak, else reset to 1)
-  let yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  if (p.lastLogin === yesterday.toDateString()) {
-    p.streak++;
-  } else {
-    p.streak = 1;
-  }
-
-  const reward = 200 + p.streak * 50;
-  p.balance += reward;
-  p.lastLogin = todayStr;
-
-  save();
-  updateUI();
-  msg("dailyMsg", `+${reward} LUTT (Streak x${p.streak})`);
 }
 
-/* 📦 DAILY CASE OPENING */
-function openCase() {
-  const p = players[user];
-  const todayStr = new Date().toDateString();
-
-  if (p.lastCase === todayStr) {
-    return msg("caseResult", "You already opened your case today!");
-  }
-
-  // Show animation
-  const anim = document.getElementById("caseAnimation");
-  anim.classList.remove("hidden");
-
-  // Hide animation after 2 seconds and show reward
-  setTimeout(() => {
-    anim.classList.add("hidden");
-
-    // Rewards with rarity tiers
-    const rewards = [
-      {amount: 50, rarity: "Common"},
-      {amount: 100, rarity: "Uncommon"},
-      {amount: 200, rarity: "Rare"},
-      {amount: 500, rarity: "Epic"},
-      {amount: 1000, rarity: "Legendary"},
-    ];
-
-    // Weighted random: more chance for common
-    const weights = [40, 25, 20, 10, 5];
-    const reward = weightedRandom(rewards, weights);
-
-    p.balance += reward.amount;
-    p.lastCase = todayStr;
-
-    save();
-    updateUI();
-
-    msg("caseResult", `📦 You won ${reward.amount} LUTT! (${reward.rarity})`);
-  }, 2000);
+ul#leaderboardList {
+  list-style: none;
+  padding-left: 0;
+  max-height: 300px;
+  overflow-y: auto;
 }
 
-/* ⚔️ CASE BATTLE vs Bot */
-function caseBattle() {
-  const betInput = document.getElementById("battleBet");
-  const bet = Number(betInput.value);
-  const p = players[user];
-
-  if (bet <= 0 || bet > p.balance) return alert("Invalid bet");
-
-  // Show animation
-  const anim = document.getElementById("battleAnimation");
-  anim.classList.remove("hidden");
-
-  setTimeout(() => {
-    anim.classList.add("hidden");
-
-    const youScore = Math.floor(Math.random() * 1000);
-    const botScore = Math.floor(Math.random() * 1000);
-
-    if (youScore > botScore) {
-      p.balance += bet;
-      msg("battleResult", `🎉 You win! (${youScore} vs ${botScore})`);
-    } else {
-      p.balance -= bet;
-      msg("battleResult", `😞 You lose! (${youScore} vs ${botScore})`);
-    }
-
-    save();
-    updateUI();
-  }, 2000);
+ul#leaderboardList li {
+  background: #333;
+  margin: 5px auto;
+  padding: 8px;
+  border-radius: 6px;
+  font-weight: bold;
+  color: #00ff99;
+  max-width: 300px;
+  text-align: left;
 }
 
-/* Utility: weighted random */
-function weightedRandom(items, weights) {
-  let total = weights.reduce((a,b) => a+b, 0);
-  let rand = Math.random() * total;
-  for (let i = 0; i < items.length; i++) {
-    if (rand < weights[i]) return items[i];
-    rand -= weights[i];
-  }
-  return items[items.length -1];
+/* Blackjack cards area */
+#blackjackCards {
+  margin-top: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
 }
 
-/* 🏆 LEADERBOARD */
-function updateLeaderboard() {
-  const list = document.getElementById("leaderboard");
-  list.innerHTML = "";
-  Object.entries(players)
-    .sort((a,b) => b[1].balance - a[1].balance)
-    .forEach(([name, data]) => {
-      const li = document.createElement("li");
-      li.textContent = `${name}: ${data.balance} LUTT`;
-      list.appendChild(li);
-    });
+.cardVisual {
+  width: 70px;
+  height: 100px;
+  border-radius: 10px;
+  background: white;
+  color: black;
+  font-weight: bold;
+  font-size: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 2px 2px 6px #007744;
+  user-select: none;
 }
 
-function msg(id, text) {
-  document.getElementById(id).innerText = text;
+/* Roulette wheel */
+.roulette-wheel {
+  margin: 20px auto;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  border: 8px solid #00ff99;
+  position: relative;
+  box-shadow: 0 0 20px #00ff99aa;
 }
+
+.roulette-pointer {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  width: 0; 
+  height: 0; 
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-bottom: 25px solid #00ff99;
+  transform: translateX(-50%);
+}
+
+/* More game styling can be added similarly */
