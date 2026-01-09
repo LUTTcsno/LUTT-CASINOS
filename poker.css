@@ -1,28 +1,57 @@
 body {
-  background: radial-gradient(circle, #1b002b, #0a0012);
-  color: #f0d9ff;
+  background: radial-gradient(circle, #14001f, #050008);
+  color: #e8d8ff;
   font-family: 'Segoe UI', sans-serif;
   text-align: center;
+  margin: 0;
 }
 
 header {
-  padding: 15px;
   background: #24003d;
-  box-shadow: 0 0 20px #8a2be2;
+  padding: 15px;
+  box-shadow: 0 0 20px #7a00ff;
 }
 
-#poker-table {
-  margin: 30px auto;
-  padding: 20px;
+button {
+  background: #7a00ff;
+  border: none;
+  padding: 10px 16px;
+  color: white;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #a342ff;
+}
+
+input {
+  padding: 8px;
+  border-radius: 6px;
+  border: none;
+  margin: 5px;
+}
+
+.hidden {
+  display: none;
+}
+
+#lobby, #table {
   max-width: 900px;
-  border-radius: 20px;
-  background: #2b004f;
-  box-shadow: 0 0 30px #7a00ff;
+  margin: auto;
+  padding: 20px;
+}
+
+#room-list button {
+  display: block;
+  width: 100%;
+  margin: 6px 0;
 }
 
 #community-cards {
   font-size: 3rem;
-  margin: 20px 0;
+  margin: 15px;
 }
 
 #players {
@@ -33,10 +62,10 @@ header {
 }
 
 .player {
-  background: #3a0066;
+  background: #32004f;
   border: 2px solid #7a00ff;
-  border-radius: 12px;
   padding: 10px;
+  border-radius: 12px;
   width: 120px;
 }
 
@@ -44,17 +73,11 @@ header {
   box-shadow: 0 0 15px #ff00ff;
 }
 
-#controls button {
-  margin: 5px;
-  padding: 10px 15px;
-  background: #7a00ff;
-  border: none;
-  color: white;
-  font-weight: bold;
-  border-radius: 8px;
-  cursor: pointer;
+#controls {
+  margin-top: 15px;
 }
 
-#controls button:hover {
-  background: #a342ff;
+#pot {
+  font-size: 1.3rem;
+  margin: 10px;
 }
