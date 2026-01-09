@@ -108,40 +108,79 @@ nav button:hover {
   display: none;
 }
 
-.case-animation {
-  margin: 15px auto;
-  width: 220px;
-  height: 110px;
-  background: linear-gradient(90deg, #00ff99 20%, #007f55 50%, #00ff99 80%);
-  border-radius: 12px;
-  animation: shimmer 1.5s infinite;
+/* Spinner Styles */
+
+.spinner-container {
+  margin: 20px auto;
+  width: 400px;
+  overflow: hidden;
+  border: 3px solid #00ff99;
+  border-radius: 10px;
+  background: #111;
+  box-shadow: 0 0 15px #00ff99aa;
+  height: 80px;
+  position: relative;
 }
 
-@keyframes shimmer {
-  0% {
-    background-position: -220px 0;
-  }
-  100% {
-    background-position: 220px 0;
-  }
+.spinner-track {
+  display: flex;
+  gap: 15px;
+  will-change: transform;
+  padding: 10px 0;
+  transition: transform 0.3s ease;
 }
 
-ul#leaderboardList {
-  list-style: none;
-  padding-left: 0;
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-ul#leaderboardList li {
-  background: #333;
-  margin: 5px auto;
-  padding: 8px;
-  border-radius: 6px;
+.spinner-item {
+  min-width: 70px;
+  height: 60px;
+  background: linear-gradient(135deg, #00ff99, #007f55);
+  border-radius: 8px;
+  box-shadow: 0 0 8px #00ff99;
+  color: black;
   font-weight: bold;
+  font-size: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  text-shadow: 0 0 5px #004422;
+  transition: transform 0.3s ease;
+}
+
+.spinner-item.active {
+  transform: scale(1.2);
+  box-shadow: 0 0 15px #00ff99, 0 0 30px #00ff99;
+}
+
+/* Case Battle spinner styles */
+
+.battle-spinner-container {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin: 20px 0;
+}
+
+.spinner-label {
+  position: absolute;
+  bottom: -25px;
+  width: 100%;
   color: #00ff99;
-  max-width: 300px;
-  text-align: left;
+  font-weight: bold;
+  font-size: 18px;
+  user-select: none;
+  text-align: center;
+}
+
+#playerSpinner, #botSpinner {
+  position: relative;
+  width: 300px;
+  height: 80px;
+  border: 3px solid #00ff99;
+  border-radius: 10px;
+  background: #111;
+  box-shadow: 0 0 20px #00ff99aa;
+  overflow: hidden;
 }
 
 /* Blackjack cards area */
@@ -176,4 +215,22 @@ ul#leaderboardList li {
   border: 8px solid #00ff99;
   position: relative;
   box-shadow: 0 0 20px #00ff99aa;
+}
+
+ul#leaderboardList {
+  list-style: none;
+  padding-left: 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+ul#leaderboardList li {
+  background: #333;
+  margin: 5px auto;
+  padding: 8px;
+  border-radius: 6px;
+  font-weight: bold;
+  color: #00ff99;
+  max-width: 300px;
+  text-align: left;
 }
