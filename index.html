@@ -7,8 +7,8 @@
 </head>
 <body>
 
-<h1>🎮 LUTT Casino</h1>
-<p class="disclaimer">Play-money only. LUTT has no real value.</p>
+<h1>🎮 LUTT Arena</h1>
+<p class="disclaimer">Play-money only. LUTT has no real-world value.</p>
 
 <div id="login" class="card">
   <input id="username" placeholder="Username">
@@ -16,39 +16,30 @@
 </div>
 
 <div id="game" class="hidden">
-  <h2>Balance: <span id="balance"></span> LUTT</h2>
+  <h2>💰 <span id="balance"></span> LUTT</h2>
+  <p>🔥 Streak: <span id="streak"></span> days</p>
 
   <div class="card">
-    <h3>🪙 Coin Flip</h3>
-    <input id="betFlip" type="number" placeholder="Bet">
-    <button onclick="coinFlip()">Flip</button>
-    <p id="flipResult"></p>
+    <h3>🎁 Daily Bonus</h3>
+    <button onclick="claimDaily()">Claim Bonus</button>
+    <p id="dailyMsg"></p>
   </div>
 
   <div class="card">
-    <h3>🎲 Dice Roll</h3>
-    <input id="betDice" type="number" placeholder="Bet">
-    <button onclick="dice()">Roll Dice</button>
-    <p id="diceResult"></p>
+    <h3>📦 Daily Case</h3>
+    <button onclick="openCase()">Open Case</button>
+    <p id="caseResult"></p>
   </div>
 
   <div class="card">
-    <h3>🎡 Roulette (Pick 0–9)</h3>
-    <input id="rouletteNum" type="number" min="0" max="9" placeholder="Number">
-    <input id="betRoulette" type="number" placeholder="Bet">
-    <button onclick="roulette()">Spin</button>
-    <p id="rouletteResult"></p>
+    <h3>⚔️ Case Battle (vs Bot)</h3>
+    <input id="battleBet" type="number" placeholder="Entry LUTT">
+    <button onclick="caseBattle()">Battle</button>
+    <p id="battleResult"></p>
   </div>
 
   <div class="card">
-    <h3>🃏 Blackjack</h3>
-    <input id="betBJ" type="number" placeholder="Bet">
-    <button onclick="blackjack()">Play</button>
-    <p id="bjResult"></p>
-  </div>
-
-  <div class="card">
-    <h3>🏆 Leaderboard</h3>
+    <h3>🏆 Local Leaderboard</h3>
     <ul id="leaderboard"></ul>
   </div>
 
