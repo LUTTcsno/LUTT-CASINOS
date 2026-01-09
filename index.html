@@ -1,110 +1,133 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>LUTT Casino 🎲</title>
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>LUTT Casino</title>
+<link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header>
-    <h1>LUTT Casino 🎲</h1>
+    <h1>LUTT Casino</h1>
   </header>
 
-  <!-- Login Section -->
-  <section id="loginSection" class="centered-section">
-    <h2>Login or Sign Up</h2>
-    <input id="emailInput" type="email" placeholder="Email" autocomplete="username" />
-    <input id="passwordInput" type="password" placeholder="Password" autocomplete="current-password" />
-    <input id="usernameInput" type="text" placeholder="Choose Username (min 3 chars)" />
-    <div class="btn-group">
-      <button id="signupBtn" class="btn primary">Sign Up</button>
-      <button id="loginBtn" class="btn secondary">Log In</button>
-    </div>
-    <button id="logoutBtn" class="btn secondary hidden">Log Out</button>
-    <p id="authMsg" class="auth-message"></p>
-  </section>
-
-  <!-- Main App Section -->
-  <section id="app" class="hidden">
-    <div id="balanceDisplay">Balance: <span id="balanceAmount">0</span> LUTT</div>
-
-    <nav class="nav-bar">
-      <button data-tab="dashboard" class="nav-btn active">Dashboard</button>
-      <button data-tab="blackjack" class="nav-btn">Blackjack</button>
-      <button data-tab="highlow" class="nav-btn">High-Low 🃏</button>
-      <button data-tab="plinko" class="nav-btn">Plinko 🎯</button>
-      <button data-tab="caseBattle" class="nav-btn">Case Battle PvP</button>
-      <button data-tab="leaderboard" class="nav-btn">Leaderboard</button>
-    </nav>
-
-    <section id="dashboard" class="gameTab">
-      <h2>Welcome to LUTT Casino!</h2>
-      <p>Choose a game above to start playing.</p>
+  <main>
+    <!-- LOGIN / SIGNUP -->
+    <section id="loginSection">
+      <h2>Login / Signup</h2>
+      <input type="email" id="emailInput" placeholder="Email" />
+      <input type="password" id="passwordInput" placeholder="Password" />
+      <input type="text" id="usernameInput" placeholder="Username" />
+      <button id="signupBtn">Sign Up</button>
+      <button id="loginBtn">Log In</button>
+      <p id="authMsg" class="error-msg"></p>
     </section>
 
-    <!-- Blackjack Section -->
-    <section id="blackjack" class="gameTab hidden">
-      <h3>Blackjack (coming soon!)</h3>
-      <p>Feature under construction.</p>
-    </section>
-
-    <!-- High-Low Section -->
-    <section id="highlow" class="gameTab hidden">
-      <h3>High-Low 🃏</h3>
-      <label>Wager:
-        <input id="highlowWager" type="number" min="1" placeholder="Enter wager" />
-      </label>
-      <button id="startHighLowBtn" class="btn primary">Start Game</button>
-
-      <div id="highlowGame" class="hidden">
-        <div id="currentCard" class="cardVisual">🂠</div>
-        <div class="highlow-buttons">
-          <button id="guessHigherBtn" class="btn secondary">Higher</button>
-          <button id="guessLowerBtn" class="btn secondary">Lower</button>
-        </div>
-        <p id="highlowMsg" class="result-msg"></p>
-        <p>Current Streak: <span id="highlowStreak">0</span></p>
+    <!-- APP MAIN -->
+    <section id="appSection" class="hidden">
+      <div class="user-info">
+        <span id="usernameDisplay">Username</span> | Balance: <span id="balanceDisplay">0</span> LUTT
+        <button id="logoutBtn">Logout</button>
       </div>
+
+      <nav class="nav-bar">
+        <button data-tab="dashboard" class="nav-btn active">Dashboard</button>
+        <button data-tab="slots" class="nav-btn">Slots 🎰</button>
+        <button data-tab="blackjack" class="nav-btn">Blackjack 🃏</button>
+        <button data-tab="highlow" class="nav-btn">High-Low 🔥</button>
+        <button data-tab="plinko" class="nav-btn">Plinko 🎯</button>
+        <button data-tab="leaderboard" class="nav-btn">Leaderboard</button>
+      </nav>
+
+      <section id="dashboard" class="gameTab">
+        <h2>Welcome to LUTT Casino!</h2>
+        <p>Choose a game from above to start playing.</p>
+      </section>
+
+      <!-- Slots Section -->
+      <section id="slots" class="gameTab hidden">
+        <h3>Slots 🎰</h3>
+        <label>Wager:
+          <input id="slotsWager" type="number" min="1" placeholder="Enter wager" />
+        </label>
+        <button id="spinSlotsBtn" class="btn primary">Spin</button>
+        <div id="slotsResult" class="result-msg"></div>
+        <div id="slotsVisual" style="font-size: 4rem; margin-top: 15px;">🎰🎰🎰</div>
+      </section>
+
+      <!-- Blackjack Section -->
+      <section id="blackjack" class="gameTab hidden">
+        <h3>Blackjack 🃏</h3>
+        <label>Wager:
+          <input id="blackjackWager" type="number" min="1" placeholder="Enter wager" />
+        </label>
+        <button id="blackjackStartBtn" class="btn primary">Start Game</button>
+        <div id="blackjackGame" class="hidden" style="margin-top: 20px;">
+          <div>
+            <strong>Your Hand:</strong> <span id="playerHand"></span> (<span id="playerScore"></span>)
+          </div>
+          <div>
+            <strong>Dealer Hand:</strong> <span id="dealerHand"></span> (<span id="dealerScore"></span>)
+          </div>
+          <div style="margin-top: 15px;">
+            <button id="hitBtn" class="btn secondary">Hit</button>
+            <button id="standBtn" class="btn secondary">Stand</button>
+            <button id="doubleBtn" class="btn secondary">Double Down</button>
+          </div>
+          <p id="blackjackMsg" class="result-msg" style="margin-top: 15px;"></p>
+        </div>
+      </section>
+
+      <!-- High-Low Section -->
+      <section id="highlow" class="gameTab hidden">
+        <h3>High-Low 🔥</h3>
+        <label>Wager:
+          <input id="highlowWager" type="number" min="1" placeholder="Enter wager" />
+        </label>
+        <button id="startHighLowBtn" class="btn primary">Start Game</button>
+        <button id="cashoutHighLowBtn" class="btn secondary hidden">Cash Out</button>
+
+        <div id="highlowGame" class="hidden">
+          <div id="currentCard" class="cardVisual">🂠</div>
+          <div class="highlow-buttons">
+            <button id="guessHigherBtn" class="btn secondary">Higher</button>
+            <button id="guessLowerBtn" class="btn secondary">Lower</button>
+          </div>
+          <p id="highlowMsg" class="result-msg"></p>
+          <p>Current Streak: <span id="highlowStreak">0</span></p>
+          <p>Current Winnings: <span id="highlowWinnings">0</span> LUTT</p>
+        </div>
+      </section>
+
+      <!-- Plinko Section -->
+      <section id="plinko" class="gameTab hidden">
+        <h3>Plinko 🎯</h3>
+        <label>Wager:
+          <input id="plinkoWager" type="number" min="1" placeholder="Enter wager" />
+        </label>
+        <label>Difficulty:
+          <select id="plinkoDifficulty">
+            <option value="easy" selected>Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+        </label>
+        <button id="plinkoStartBtn" class="btn primary">Drop Ball</button>
+        <div id="plinkoBoard" class="plinko-board"></div>
+        <p id="plinkoResult" class="result-msg"></p>
+      </section>
+
+      <!-- Leaderboard Section -->
+      <section id="leaderboard" class="gameTab hidden">
+        <h3>Leaderboard</h3>
+        <ol id="leaderboardList"></ol>
+      </section>
     </section>
+  </main>
 
-    <!-- Plinko Section -->
-    <section id="plinko" class="gameTab hidden">
-      <h3>Plinko 🎯</h3>
-      <label>Wager:
-        <input id="plinkoWager" type="number" min="1" placeholder="Enter wager" />
-      </label>
-      <label>Difficulty:
-        <select id="plinkoDifficulty">
-          <option value="easy" selected>Easy</option>
-          <option value="medium">Medium</option>
-          <option value="hard">Hard</option>
-        </select>
-      </label>
-      <button id="plinkoStartBtn" class="btn primary">Drop Ball</button>
-      <div id="plinkoBoard" class="plinko-board"></div>
-      <p id="plinkoResult" class="result-msg"></p>
-    </section>
-
-    <!-- Case Battle Section -->
-    <section id="caseBattle" class="gameTab hidden">
-      <h3>Case Battle PvP (coming soon!)</h3>
-      <p>Feature under construction.</p>
-    </section>
-
-    <!-- Leaderboard Section -->
-    <section id="leaderboard" class="gameTab hidden">
-      <h3>Leaderboard</h3>
-      <ul id="leaderboardList"></ul>
-    </section>
-  </section>
-
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
-  <!-- Main Script -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
